@@ -1,0 +1,326 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>shared_table_widget</class>
+ <widget class="QMainWindow" name="shared_table_widget">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>1123</width>
+    <height>793</height>
+   </rect>
+  </property>
+  <property name="font">
+   <font>
+    <pointsize>11</pointsize>
+   </font>
+  </property>
+  <property name="windowTitle">
+   <string>共享数据表</string>
+  </property>
+  <property name="windowIcon">
+   <iconset resource="../../assets.qrc">
+    <normaloff>:/icons/main.ico</normaloff>:/icons/main.ico</iconset>
+  </property>
+  <widget class="QWidget" name="centralwidget">
+   <layout class="QHBoxLayout" name="horizontalLayout_2">
+    <property name="spacing">
+     <number>2</number>
+    </property>
+    <property name="leftMargin">
+     <number>3</number>
+    </property>
+    <property name="topMargin">
+     <number>3</number>
+    </property>
+    <property name="rightMargin">
+     <number>3</number>
+    </property>
+    <property name="bottomMargin">
+     <number>3</number>
+    </property>
+    <item>
+     <layout class="QHBoxLayout" name="horizontalLayout" stretch="4,1">
+      <property name="spacing">
+       <number>2</number>
+      </property>
+      <property name="leftMargin">
+       <number>3</number>
+      </property>
+      <property name="topMargin">
+       <number>3</number>
+      </property>
+      <property name="rightMargin">
+       <number>3</number>
+      </property>
+      <property name="bottomMargin">
+       <number>3</number>
+      </property>
+      <item>
+       <widget class="MagicTable" name="tableWidget">
+        <property name="frameShape">
+         <enum>QFrame::Box</enum>
+        </property>
+        <property name="frameShadow">
+         <enum>QFrame::Raised</enum>
+        </property>
+        <column>
+         <property name="text">
+          <string>序号</string>
+         </property>
+        </column>
+        <column>
+         <property name="text">
+          <string>日期</string>
+         </property>
+        </column>
+        <column>
+         <property name="text">
+          <string>司机</string>
+         </property>
+        </column>
+        <column>
+         <property name="text">
+          <string>车号</string>
+         </property>
+        </column>
+        <column>
+         <property name="text">
+          <string>车型</string>
+         </property>
+        </column>
+        <column>
+         <property name="text">
+          <string>签单</string>
+         </property>
+        </column>
+        <column>
+         <property name="text">
+          <string>车属单位</string>
+         </property>
+        </column>
+        <column>
+         <property name="text">
+          <string>用车单位</string>
+         </property>
+        </column>
+        <column>
+         <property name="text">
+          <string>用车时间</string>
+         </property>
+        </column>
+        <column>
+         <property name="text">
+          <string>行程</string>
+         </property>
+        </column>
+        <column>
+         <property name="text">
+          <string>金额</string>
+         </property>
+        </column>
+        <column>
+         <property name="text">
+          <string>收</string>
+         </property>
+        </column>
+        <column>
+         <property name="text">
+          <string>票</string>
+         </property>
+        </column>
+        <column>
+         <property name="text">
+          <string>应付</string>
+         </property>
+        </column>
+        <column>
+         <property name="text">
+          <string>付</string>
+         </property>
+        </column>
+        <column>
+         <property name="text">
+          <string>结余</string>
+         </property>
+        </column>
+        <column>
+         <property name="text">
+          <string>备注</string>
+         </property>
+        </column>
+       </widget>
+      </item>
+      <item>
+       <layout class="QVBoxLayout" name="verticalLayout" stretch="0,1">
+        <property name="spacing">
+         <number>0</number>
+        </property>
+        <property name="leftMargin">
+         <number>0</number>
+        </property>
+        <property name="topMargin">
+         <number>0</number>
+        </property>
+        <property name="rightMargin">
+         <number>0</number>
+        </property>
+        <property name="bottomMargin">
+         <number>0</number>
+        </property>
+        <item>
+         <widget class="QLabel" name="label">
+          <property name="minimumSize">
+           <size>
+            <width>0</width>
+            <height>45</height>
+           </size>
+          </property>
+          <property name="frameShape">
+           <enum>QFrame::WinPanel</enum>
+          </property>
+          <property name="frameShadow">
+           <enum>QFrame::Raised</enum>
+          </property>
+          <property name="text">
+           <string>操作历史</string>
+          </property>
+          <property name="alignment">
+           <set>Qt::AlignCenter</set>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QListWidget" name="logWidget">
+          <property name="frameShape">
+           <enum>QFrame::StyledPanel</enum>
+          </property>
+          <property name="frameShadow">
+           <enum>QFrame::Plain</enum>
+          </property>
+          <property name="autoScrollMargin">
+           <number>16</number>
+          </property>
+          <property name="resizeMode">
+           <enum>QListView::Fixed</enum>
+          </property>
+          <property name="layoutMode">
+           <enum>QListView::SinglePass</enum>
+          </property>
+          <property name="spacing">
+           <number>5</number>
+          </property>
+          <property name="viewMode">
+           <enum>QListView::ListMode</enum>
+          </property>
+         </widget>
+        </item>
+       </layout>
+      </item>
+     </layout>
+    </item>
+   </layout>
+  </widget>
+  <widget class="QMenuBar" name="menubar">
+   <property name="geometry">
+    <rect>
+     <x>0</x>
+     <y>0</y>
+     <width>1123</width>
+     <height>26</height>
+    </rect>
+   </property>
+   <widget class="QMenu" name="menu">
+    <property name="title">
+     <string>基础操作</string>
+    </property>
+    <addaction name="separator"/>
+    <addaction name="add_rows"/>
+    <addaction name="add_one_row"/>
+    <addaction name="delete_selected_row"/>
+    <addaction name="export_main_table_action"/>
+   </widget>
+   <widget class="QMenu" name="menu_2">
+    <property name="title">
+     <string>用户</string>
+    </property>
+    <addaction name="user_logout"/>
+   </widget>
+   <widget class="QMenu" name="menu_3">
+    <property name="title">
+     <string>筛选</string>
+    </property>
+    <addaction name="show_all_data_action"/>
+    <addaction name="main_table_search_action"/>
+    <addaction name="create_user_table_action"/>
+    <addaction name="create_wage_table_action"/>
+    <addaction name="u_s_action"/>
+   </widget>
+   <addaction name="menu"/>
+   <addaction name="menu_3"/>
+   <addaction name="menu_2"/>
+  </widget>
+  <widget class="QStatusBar" name="statusbar"/>
+  <action name="add_one_row">
+   <property name="text">
+    <string>添加一行</string>
+   </property>
+  </action>
+  <action name="delete_selected_row">
+   <property name="text">
+    <string>删除所选</string>
+   </property>
+  </action>
+  <action name="user_logout">
+   <property name="text">
+    <string>退出登录</string>
+   </property>
+  </action>
+  <action name="main_table_search_action">
+   <property name="text">
+    <string>查询详表</string>
+   </property>
+  </action>
+  <action name="create_user_table_action">
+   <property name="text">
+    <string>查询账单</string>
+   </property>
+  </action>
+  <action name="create_wage_table_action">
+   <property name="text">
+    <string>查询工资</string>
+   </property>
+  </action>
+  <action name="u_s_action">
+   <property name="text">
+    <string>客户账单统计</string>
+   </property>
+  </action>
+  <action name="show_all_data_action">
+   <property name="text">
+    <string>显示全部数据</string>
+   </property>
+  </action>
+  <action name="export_main_table_action">
+   <property name="text">
+    <string>导出当前数据</string>
+   </property>
+  </action>
+  <action name="add_rows">
+   <property name="text">
+    <string>批量添加</string>
+   </property>
+  </action>
+ </widget>
+ <customwidgets>
+  <customwidget>
+   <class>MagicTable</class>
+   <extends>QTableWidget</extends>
+   <header>MagicComponent</header>
+  </customwidget>
+ </customwidgets>
+ <resources>
+  <include location="../../assets.qrc"/>
+ </resources>
+ <connections/>
+</ui>

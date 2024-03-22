@@ -1,0 +1,12 @@
+.idea
+__pycache__
+venv
+build
+dist
+
+settings.py
+.config.json
+
+*.spec
+*.xlsx
+*.exe

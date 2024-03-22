@@ -1,0 +1,4 @@
+PyQt5
+"python-socketio[client]"
+openpyxl
+aiohttp

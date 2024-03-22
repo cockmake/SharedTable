@@ -1,0 +1,1 @@
+from MagicComponent.TableColumnCondition.win import TableColumnCondition

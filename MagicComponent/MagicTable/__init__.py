@@ -1,0 +1,1 @@
+from MagicComponent.MagicTable.win import MagicTable
