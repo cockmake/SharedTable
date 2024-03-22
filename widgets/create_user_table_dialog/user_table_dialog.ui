@@ -223,6 +223,12 @@
          </item>
          <item>
           <widget class="QScrollArea" name="yongchedanweis">
+           <property name="frameShape">
+            <enum>QFrame::WinPanel</enum>
+           </property>
+           <property name="frameShadow">
+            <enum>QFrame::Plain</enum>
+           </property>
            <property name="sizeAdjustPolicy">
             <enum>QAbstractScrollArea::AdjustToContents</enum>
            </property>
@@ -234,8 +240,8 @@
              <rect>
               <x>0</x>
               <y>0</y>
-              <width>320</width>
-              <height>446</height>
+              <width>318</width>
+              <height>444</height>
              </rect>
             </property>
            </widget>

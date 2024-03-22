@@ -243,6 +243,12 @@
            </item>
            <item>
             <widget class="QScrollArea" name="yongchedanweis_scroll_area">
+             <property name="frameShape">
+              <enum>QFrame::WinPanel</enum>
+             </property>
+             <property name="frameShadow">
+              <enum>QFrame::Plain</enum>
+             </property>
              <property name="widgetResizable">
               <bool>true</bool>
              </property>
@@ -251,8 +257,8 @@
                <rect>
                 <x>0</x>
                 <y>0</y>
-                <width>242</width>
-                <height>479</height>
+                <width>240</width>
+                <height>477</height>
                </rect>
               </property>
              </widget>
@@ -393,6 +399,12 @@
          </item>
          <item>
           <widget class="QScrollArea" name="cheshudanweis_scroll_area">
+           <property name="frameShape">
+            <enum>QFrame::WinPanel</enum>
+           </property>
+           <property name="frameShadow">
+            <enum>QFrame::Plain</enum>
+           </property>
            <property name="widgetResizable">
             <bool>true</bool>
            </property>
@@ -401,8 +413,8 @@
              <rect>
               <x>0</x>
               <y>0</y>
-              <width>259</width>
-              <height>387</height>
+              <width>257</width>
+              <height>385</height>
              </rect>
             </property>
            </widget>
@@ -489,6 +501,12 @@
          </item>
          <item>
           <widget class="QScrollArea" name="drivers_scroll_area">
+           <property name="frameShape">
+            <enum>QFrame::WinPanel</enum>
+           </property>
+           <property name="frameShadow">
+            <enum>QFrame::Plain</enum>
+           </property>
            <property name="widgetResizable">
             <bool>true</bool>
            </property>
@@ -497,8 +515,8 @@
              <rect>
               <x>0</x>
               <y>0</y>
-              <width>259</width>
-              <height>386</height>
+              <width>257</width>
+              <height>384</height>
              </rect>
             </property>
            </widget>

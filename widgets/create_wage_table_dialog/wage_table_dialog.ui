@@ -234,6 +234,12 @@
              <height>230</height>
             </size>
            </property>
+           <property name="frameShape">
+            <enum>QFrame::WinPanel</enum>
+           </property>
+           <property name="frameShadow">
+            <enum>QFrame::Plain</enum>
+           </property>
            <property name="widgetResizable">
             <bool>true</bool>
            </property>
@@ -242,8 +248,8 @@
              <rect>
               <x>0</x>
               <y>0</y>
-              <width>304</width>
-              <height>249</height>
+              <width>302</width>
+              <height>247</height>
              </rect>
             </property>
            </widget>
@@ -331,6 +337,12 @@
              <height>230</height>
             </size>
            </property>
+           <property name="frameShape">
+            <enum>QFrame::WinPanel</enum>
+           </property>
+           <property name="frameShadow">
+            <enum>QFrame::Plain</enum>
+           </property>
            <property name="widgetResizable">
             <bool>true</bool>
            </property>
@@ -339,8 +351,8 @@
              <rect>
               <x>0</x>
               <y>0</y>
-              <width>304</width>
-              <height>249</height>
+              <width>302</width>
+              <height>247</height>
              </rect>
             </property>
            </widget>

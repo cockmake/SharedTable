@@ -99,6 +99,12 @@
         </item>
         <item>
          <widget class="QScrollArea" name="scroll_area">
+          <property name="frameShape">
+           <enum>QFrame::WinPanel</enum>
+          </property>
+          <property name="frameShadow">
+           <enum>QFrame::Plain</enum>
+          </property>
           <property name="widgetResizable">
            <bool>true</bool>
           </property>
@@ -107,8 +113,8 @@
             <rect>
              <x>0</x>
              <y>0</y>
-             <width>378</width>
-             <height>401</height>
+             <width>376</width>
+             <height>399</height>
             </rect>
            </property>
           </widget>
