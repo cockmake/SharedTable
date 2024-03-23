@@ -98,7 +98,7 @@
         </template>
       </el-table-column>
 
-      <el-table-column fixed width="130">
+      <el-table-column fixed width="220">
         <template #header>
           <el-input v-model="search" placeholder="姓名搜索"/>
         </template>
@@ -108,16 +108,17 @@
                 type="primary"
                 @click="handleEdit(scope.$index, scope.row)">修改权限
             </el-button>
-<!--            <el-button-->
-<!--                type="danger"-->
-<!--                @click="handleDelete(scope.$index, scope.row)">删除用户-->
-<!--            </el-button>-->
+            <el-button
+                type="danger"
+                @click="handleDelete(scope.$index, scope.row)">删除用户
+            </el-button>
           </div>
 
         </template>
       </el-table-column>
     </el-table>
-    <el-dialog v-model="dialogVisible" title="权限编辑" width="60%" draggable destroy-on-close style="border-radius: 1%">
+    <el-dialog v-model="dialogVisible" title="权限编辑" width="60%" draggable destroy-on-close
+               style="border-radius: 1%">
       <div style="width: 100%; height: 100%; display: flex; justify-content: center; align-items: center">
         <el-form :model="current_user" label-width="auto" style="width: 80%" label-position="right">
           <el-form-item label="姓名">
@@ -160,6 +161,22 @@
         </div>
       </template>
     </el-dialog>
+    <el-dialog v-model="centerDialogVisible" title="警告" width="40%" center draggable destroy-on-close
+               style="border-radius: 1%">
+    <span
+        style="width: 100%; display: flex; justify-content: center;
+        align-items: center; font-size: 16px; font-weight: bold">
+      确认删除用户 {{ current_user.name }} 吗？
+    </span>
+      <template #footer>
+        <div class="dialog-footer">
+          <el-button @click="centerDialogVisible = false">取消</el-button>
+          <el-button type="danger" @click="confirmDelete">
+            确认
+          </el-button>
+        </div>
+      </template>
+    </el-dialog>
   </div>
 
 </template>
@@ -168,10 +185,14 @@
 import {computed, onMounted, ref} from 'vue'
 import axios from "axios";
 import {ElNotification} from "element-plus";
+
 function judge_type(value: string) {
   return value === '√' ? 'success' : 'danger';
 }
+
 const dialogVisible = ref(false)
+const centerDialogVisible = ref(false)
+
 function init_users_privilege() {
   axios.get('/admin/get_users_privilege').then((res) => {
     tableData.value = res.data;
@@ -277,9 +298,35 @@ const handleEdit = (index: number, row: User) => {
     current_user.value[key] = current_user.value[key] === '√';
   }
 }
-// const handleDelete = (index: number, row: User) => {
-//   console.log(index, row)
-// }
+
+function confirmDelete() {
+  // 根据username和name删除用户
+  axios.post('/admin/delete_user', {
+    username: current_user.value.username,
+    name: current_user.value.name,
+  }).then((res) => {
+    ElNotification({
+      title: '提示信息',
+      message: res.data['msg'],
+      type: res.data.type,
+      duration: 3000,
+      showClose: true,
+      position: 'top-right',
+    });
+    if (res.data.type === 'success') {
+      // 本地删除这一行
+      tableData.value = tableData.value.filter((item) => item.username !== current_user.value.username && item.name !== current_user.value.name)
+      centerDialogVisible.value = false
+    }
+  }).catch((err) => {
+    console.log(err);
+  });
+}
+
+function handleDelete(index: number, row: User) {
+  centerDialogVisible.value = true
+  current_user.value = {...row}
+}
 
 const tableData = ref([] as User[])
 </script>
