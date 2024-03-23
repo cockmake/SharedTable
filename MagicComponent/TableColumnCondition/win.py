@@ -56,4 +56,5 @@ class TableColumnCondition(QDialog, Ui_table_column_condition):
         if self.select_all.isChecked():
             self.not_select_all.setChecked(False)
             for checkbox in self.checkbox_list:
-                checkbox.setChecked(True)
+                if checkbox.isVisible():
+                    checkbox.setChecked(True)

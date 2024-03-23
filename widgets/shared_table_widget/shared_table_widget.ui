@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1123</width>
-    <height>793</height>
+    <width>1121</width>
+    <height>786</height>
    </rect>
   </property>
   <property name="font">
@@ -23,7 +23,7 @@
     <normaloff>:/icons/main.ico</normaloff>:/icons/main.ico</iconset>
   </property>
   <widget class="QWidget" name="centralwidget">
-   <layout class="QHBoxLayout" name="horizontalLayout_2">
+   <layout class="QHBoxLayout" name="horizontalLayout_3" stretch="7,2">
     <property name="spacing">
      <number>2</number>
     </property>
@@ -40,7 +40,102 @@
      <number>3</number>
     </property>
     <item>
-     <layout class="QHBoxLayout" name="horizontalLayout" stretch="4,1">
+     <widget class="MagicTable" name="tableWidget">
+      <property name="frameShape">
+       <enum>QFrame::Box</enum>
+      </property>
+      <property name="frameShadow">
+       <enum>QFrame::Raised</enum>
+      </property>
+      <column>
+       <property name="text">
+        <string>序号</string>
+       </property>
+      </column>
+      <column>
+       <property name="text">
+        <string>日期</string>
+       </property>
+      </column>
+      <column>
+       <property name="text">
+        <string>司机</string>
+       </property>
+      </column>
+      <column>
+       <property name="text">
+        <string>车号</string>
+       </property>
+      </column>
+      <column>
+       <property name="text">
+        <string>车型</string>
+       </property>
+      </column>
+      <column>
+       <property name="text">
+        <string>签单</string>
+       </property>
+      </column>
+      <column>
+       <property name="text">
+        <string>车属单位</string>
+       </property>
+      </column>
+      <column>
+       <property name="text">
+        <string>用车单位</string>
+       </property>
+      </column>
+      <column>
+       <property name="text">
+        <string>用车时间</string>
+       </property>
+      </column>
+      <column>
+       <property name="text">
+        <string>行程</string>
+       </property>
+      </column>
+      <column>
+       <property name="text">
+        <string>金额</string>
+       </property>
+      </column>
+      <column>
+       <property name="text">
+        <string>收</string>
+       </property>
+      </column>
+      <column>
+       <property name="text">
+        <string>票</string>
+       </property>
+      </column>
+      <column>
+       <property name="text">
+        <string>应付</string>
+       </property>
+      </column>
+      <column>
+       <property name="text">
+        <string>付</string>
+       </property>
+      </column>
+      <column>
+       <property name="text">
+        <string>结余</string>
+       </property>
+      </column>
+      <column>
+       <property name="text">
+        <string>备注</string>
+       </property>
+      </column>
+     </widget>
+    </item>
+    <item>
+     <layout class="QVBoxLayout" name="verticalLayout_2" stretch="1,5">
       <property name="spacing">
        <number>2</number>
       </property>
@@ -57,119 +152,30 @@
        <number>3</number>
       </property>
       <item>
-       <widget class="MagicTable" name="tableWidget">
-        <property name="frameShape">
-         <enum>QFrame::Box</enum>
-        </property>
-        <property name="frameShadow">
-         <enum>QFrame::Raised</enum>
-        </property>
-        <column>
-         <property name="text">
-          <string>序号</string>
-         </property>
-        </column>
-        <column>
-         <property name="text">
-          <string>日期</string>
-         </property>
-        </column>
-        <column>
-         <property name="text">
-          <string>司机</string>
-         </property>
-        </column>
-        <column>
-         <property name="text">
-          <string>车号</string>
-         </property>
-        </column>
-        <column>
-         <property name="text">
-          <string>车型</string>
-         </property>
-        </column>
-        <column>
-         <property name="text">
-          <string>签单</string>
-         </property>
-        </column>
-        <column>
-         <property name="text">
-          <string>车属单位</string>
-         </property>
-        </column>
-        <column>
-         <property name="text">
-          <string>用车单位</string>
-         </property>
-        </column>
-        <column>
-         <property name="text">
-          <string>用车时间</string>
-         </property>
-        </column>
-        <column>
-         <property name="text">
-          <string>行程</string>
-         </property>
-        </column>
-        <column>
-         <property name="text">
-          <string>金额</string>
-         </property>
-        </column>
-        <column>
-         <property name="text">
-          <string>收</string>
-         </property>
-        </column>
-        <column>
-         <property name="text">
-          <string>票</string>
-         </property>
-        </column>
-        <column>
-         <property name="text">
-          <string>应付</string>
-         </property>
-        </column>
-        <column>
-         <property name="text">
-          <string>付</string>
-         </property>
-        </column>
-        <column>
-         <property name="text">
-          <string>结余</string>
-         </property>
-        </column>
-        <column>
-         <property name="text">
-          <string>备注</string>
-         </property>
-        </column>
-       </widget>
-      </item>
-      <item>
-       <layout class="QVBoxLayout" name="verticalLayout" stretch="0,1">
+       <layout class="QVBoxLayout" name="verticalLayout">
         <property name="spacing">
-         <number>0</number>
+         <number>2</number>
         </property>
         <property name="leftMargin">
-         <number>0</number>
+         <number>3</number>
         </property>
         <property name="topMargin">
-         <number>0</number>
+         <number>3</number>
         </property>
         <property name="rightMargin">
-         <number>0</number>
+         <number>3</number>
         </property>
         <property name="bottomMargin">
-         <number>0</number>
+         <number>3</number>
         </property>
         <item>
          <widget class="QLabel" name="label">
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Preferred" vsizetype="Expanding">
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
+          </property>
           <property name="minimumSize">
            <size>
             <width>0</width>
@@ -191,31 +197,100 @@
          </widget>
         </item>
         <item>
-         <widget class="QListWidget" name="logWidget">
-          <property name="frameShape">
-           <enum>QFrame::StyledPanel</enum>
-          </property>
-          <property name="frameShadow">
-           <enum>QFrame::Plain</enum>
-          </property>
-          <property name="autoScrollMargin">
-           <number>16</number>
-          </property>
-          <property name="resizeMode">
-           <enum>QListView::Fixed</enum>
-          </property>
-          <property name="layoutMode">
-           <enum>QListView::SinglePass</enum>
-          </property>
+         <layout class="QHBoxLayout" name="horizontalLayout_2" stretch="3,1">
           <property name="spacing">
-           <number>5</number>
+           <number>2</number>
           </property>
-          <property name="viewMode">
-           <enum>QListView::ListMode</enum>
+          <property name="leftMargin">
+           <number>3</number>
           </property>
-         </widget>
+          <property name="topMargin">
+           <number>3</number>
+          </property>
+          <property name="rightMargin">
+           <number>3</number>
+          </property>
+          <property name="bottomMargin">
+           <number>3</number>
+          </property>
+          <item>
+           <widget class="QLineEdit" name="log_search_key_line_edit">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
+            <property name="minimumSize">
+             <size>
+              <width>0</width>
+              <height>45</height>
+             </size>
+            </property>
+            <property name="frame">
+             <bool>true</bool>
+            </property>
+            <property name="alignment">
+             <set>Qt::AlignCenter</set>
+            </property>
+            <property name="dragEnabled">
+             <bool>false</bool>
+            </property>
+            <property name="placeholderText">
+             <string>日志过滤</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QPushButton" name="clear_log_btn">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Preferred" vsizetype="Expanding">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
+            <property name="minimumSize">
+             <size>
+              <width>0</width>
+              <height>45</height>
+             </size>
+            </property>
+            <property name="text">
+             <string>清空</string>
+            </property>
+           </widget>
+          </item>
+         </layout>
         </item>
        </layout>
+      </item>
+      <item>
+       <widget class="QListWidget" name="logWidget">
+        <property name="frameShape">
+         <enum>QFrame::StyledPanel</enum>
+        </property>
+        <property name="frameShadow">
+         <enum>QFrame::Plain</enum>
+        </property>
+        <property name="autoScrollMargin">
+         <number>16</number>
+        </property>
+        <property name="resizeMode">
+         <enum>QListView::Fixed</enum>
+        </property>
+        <property name="layoutMode">
+         <enum>QListView::SinglePass</enum>
+        </property>
+        <property name="spacing">
+         <number>5</number>
+        </property>
+        <property name="viewMode">
+         <enum>QListView::ListMode</enum>
+        </property>
+        <property name="sortingEnabled">
+         <bool>false</bool>
+        </property>
+       </widget>
       </item>
      </layout>
     </item>
@@ -226,7 +301,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>1123</width>
+     <width>1121</width>
      <height>26</height>
     </rect>
    </property>
@@ -278,7 +353,7 @@
   </action>
   <action name="main_table_search_action">
    <property name="text">
-    <string>查询详表</string>
+    <string>筛选详表</string>
    </property>
   </action>
   <action name="create_user_table_action">

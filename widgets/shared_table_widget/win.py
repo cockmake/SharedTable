@@ -21,6 +21,7 @@ from widgets.u_s_dialog.win import USDialog
 class SharedTableWin(QtWidgets.QMainWindow, Ui_shared_table_widget):
     def __init__(self, parent=None):
         super(SharedTableWin, self).__init__(parent)
+
         self.setupUi(self)
 
         self.key_convert = {
@@ -75,6 +76,8 @@ class SharedTableWin(QtWidgets.QMainWindow, Ui_shared_table_widget):
         self.socketio_client.add_rows_to_data_center_signal.connect(self.add_rows_to_data_center_callback)
         self.socketio_client.delete_rows_from_data_center_signal.connect(self.delete_rows_from_data_center_callback)
         self.socketio_client.update_data_center_signal.connect(self.update_data_center_callback)
+        self.socketio_client.all_operation_logs_from_date_signal.connect(self.all_operation_logs_from_date)
+        self.socketio_client.error_occurred_signal.connect(self.socketio_connect_error_occurred_slot)
         # menu actions
         self.add_one_row.triggered.connect(self.add_one_row_slot)
         self.add_rows.triggered.connect(self.add_rows_slot)
@@ -94,6 +97,9 @@ class SharedTableWin(QtWidgets.QMainWindow, Ui_shared_table_widget):
 
         self.tableWidget.cellClicked.connect(self.table_widget_cell_clicked_slot)
 
+
+        self.log_search_key_line_edit.textChanged.connect(self.log_search_key_line_edit_text_changed)
+        self.clear_log_btn.clicked.connect(lambda: self.logWidget.clear())
         self.logWidget.setWordWrap(True)
         # 行程所在列宽度设置为380
         self.tableWidget.setColumnWidth(self.column_name_to_index['行程'], 380)
@@ -104,24 +110,51 @@ class SharedTableWin(QtWidgets.QMainWindow, Ui_shared_table_widget):
         self.check_box_index = {qd_index, piao_index, shou_index, fu_index}
         for index in self.check_box_index:
             self.tableWidget.setColumnWidth(index, 80)
+
         self.name = None
         self.username = None
         self.operation_type = None
         self.access_token = None
+        self.privilege = None
+
         self.last_click_pos = (-1, -1)
         self.http = Http()
         self.center()
 
+    def socketio_connect_error_occurred_slot(self, *args):
+        self.socketio_client.connect(self.access_token, "/")
+    def log_search_key_line_edit_text_changed(self, key):
+        # 过滤logWidget中的内容
+        for i in range(self.logWidget.count()):
+            item = self.logWidget.item(i)
+            if key in item.text():
+                item.setHidden(False)
+            else:
+                item.setHidden(True)
+    def all_operation_logs_from_date(self, logs: list):
+        self.logWidget.clear()
+        # logs逆序
+        logs.reverse()
+        for log in logs:
+            log = log[0]
+            self.logWidget.addItem(log + '\n')
+
+
     def log_widget_append(self, operation_desc):
-        self.logWidget.addItem(operation_desc + '\n')
+        self.logWidget.insertItem(0, operation_desc + '\n')
 
     def add_rows_to_data_center_callback(self, resp):
         data = resp['data']
         operation_desc = resp['operation_desc']
-        self.logWidget.addItem(operation_desc + '\n')
+        self.logWidget.insertItem(0, operation_desc + '\n')
         self.init_table_data(data)
 
     def add_rows_slot(self):
+        # 先判断是否有添加权限
+        if self.privilege['can_add'] != '√':
+            QtWidgets.QMessageBox.warning(self, "警告", "您没有添加权限！")
+            return
+
         # 这个操作需要打开一个文件选择对话框，选择一个excel文件，然后将数据导入到表格中
         filename, file_type = QtWidgets.QFileDialog.getOpenFileName(self, "选择要导入的文件", "./",
                                                                     "Excel(*.xlsx *.xls *.xlsm)")
@@ -169,6 +202,8 @@ class SharedTableWin(QtWidgets.QMainWindow, Ui_shared_table_widget):
             QtWidgets.QMessageBox.warning(self, "导出提示", "确保当前打开的文件已被关闭，然后重试！")
 
     def refresh_table_btn_clicked(self):
+        if not self.socketio_client.sio.connected:
+            self.socketio_client.connect(self.access_token, "/")
         self.socketio_client.sio.emit("c2s_refresh_table_from_data_center")
 
     def get_yongchedanwei_from_main_table(self):
@@ -424,7 +459,6 @@ class SharedTableWin(QtWidgets.QMainWindow, Ui_shared_table_widget):
             self.tableWidget.setRowHidden(i, False)
 
     def closeEvent(self, e):
-
         # 清空服务器端的access_token
         if self.access_token:
             url = f"{ServiceUri}:{ServicePort}/user/logout"
@@ -433,25 +467,25 @@ class SharedTableWin(QtWidgets.QMainWindow, Ui_shared_table_widget):
             }
             params = {}
             self.http.get(url, params, headers)
-        # 断开连接socketio
-        self.socketio_client.stop()
-        time.sleep(0.1)
+
+        time.sleep(0.2)
 
     def user_logout_slot(self):
         self.close()
 
-    def after_login(self, username, name, operation_type, access_token):
+    def after_login(self, username, name, operation_type, access_token, privilege):
         self.show()
         self.username = username
         self.name = name
         self.operation_type = operation_type
         self.access_token = access_token
-        # 设置MainWindow的提示
-        self.statusbar.showMessage(f"欢迎您，{name}，您的权限是{operation_type}。")
+        self.privilege = privilege
+
+        # 设置statusbar的提示
+        self.statusbar.showMessage(f"欢迎您，{name}。")
         try:
             self.socketio_client.connect(access_token, "/")
         except Exception as e:
-            print(traceback.format_exc())
             print(e)
 
     def delete_rows_from_data_center_callback(self, resp):
@@ -472,10 +506,15 @@ class SharedTableWin(QtWidgets.QMainWindow, Ui_shared_table_widget):
         for row in rows_to_delete:
             self.tableWidget.removeRow(row)
 
-        self.logWidget.addItem(operation_desc + '\n')
+        self.logWidget.insertItem(0, operation_desc + '\n')
         self.tableWidget.cellChanged.connect(self.cell_changed_slot)
 
     def delete_rows_from_data_center(self):
+        # 先判断是否有删除权限
+        if self.privilege['can_delete'] != '√':
+            QtWidgets.QMessageBox.warning(self, "警告", "您没有删除权限！")
+            return
+
         record_ids = []
         selected_ranges = self.tableWidget.selectedRanges()
         # 可能存在多个选中区域，record_id可能重复
@@ -526,12 +565,12 @@ class SharedTableWin(QtWidgets.QMainWindow, Ui_shared_table_widget):
                         pass
                 break
 
-        self.logWidget.addItem(operation_desc + '\n')
+        self.logWidget.insertItem(0, operation_desc + '\n')
         self.tableWidget.cellChanged.connect(self.cell_changed_slot)
 
     def cell_changed_slot(self, row, column):
         # 更新数据中心的内容
-        print("检测到数据发生变化：", row, column)
+        # print("检测到数据发生变化：", row, column)
         record_id = self.tableWidget.item(row, 0).text()
         key = self.name_to_key[self.tableWidget.horizontalHeaderItem(column).text()]
         value = self.tableWidget.item(row, column).text()
@@ -558,11 +597,14 @@ class SharedTableWin(QtWidgets.QMainWindow, Ui_shared_table_widget):
             key = self.key_convert[key]
             self.tableWidget.setItem(row, self.column_name_to_index[key], QtWidgets.QTableWidgetItem(str(value)))
 
-        self.logWidget.addItem(operation_desc + '\n')
-        self.disable_first_column()
+        self.logWidget.insertItem(0, operation_desc + '\n')
+
+        self.disable_column()
+
         self.tableWidget.cellChanged.connect(self.cell_changed_slot)
 
     def add_one_row_to_data_center(self, add_info):
+
         convert_add_info = {}
         for key, value in add_info.items():
             convert_add_info[self.old_version_key_to_new_version_key[key]] = value
@@ -576,6 +618,11 @@ class SharedTableWin(QtWidgets.QMainWindow, Ui_shared_table_widget):
         })
 
     def add_one_row_slot(self):
+        # 先判断是否有权限
+        if self.privilege['can_add'] != '√':
+            QtWidgets.QMessageBox.warning(self, "警告", "您没有添加权限！")
+            return
+
         dialog = MainTableAddDialog(self)
         dialog.add_confirm.connect(self.add_one_row_to_data_center)
         dialog.exec_()
@@ -588,13 +635,19 @@ class SharedTableWin(QtWidgets.QMainWindow, Ui_shared_table_widget):
         item.setText(text)
 
     def table_widget_cell_clicked_slot(self, row, column):
-        print("单元格被点击：", row, column)
+        # print("单元格被点击：", row, column)
         if self.last_click_pos[0] != -1:
             self.tableWidget.removeCellWidget(self.last_click_pos[0], self.last_click_pos[1])
             self.last_click_pos = (-1, -1)
         # 下面四列需要QComboBox {'√', '×', ''}
         if column not in self.check_box_index:
             return
+        # 判断对应的权限
+        column_name = self.tableWidget.horizontalHeaderItem(column).text()
+        key = self.name_to_key[column_name]
+        if self.privilege[key] != '√':
+            return
+
         self.last_click_pos = (row, column)
         # 该单元格无法直接编辑，需要弹出QComboBox
         # 设置无法编辑
@@ -609,10 +662,24 @@ class SharedTableWin(QtWidgets.QMainWindow, Ui_shared_table_widget):
         combo_box.currentTextChanged.connect(lambda text: self.combo_box_current_text_changed(row, column, text))
 
     # 表格第一列是序号，不允许编辑，但是允许选中
-    def disable_first_column(self):
+    def disable_column(self):
+        # 设置第一列不可编辑
         for i in range(self.tableWidget.rowCount()):
             item = self.tableWidget.item(i, 0)
             item.setFlags(QtCore.Qt.ItemIsEnabled | QtCore.Qt.ItemIsSelectable)
+        # 根据权限设置其他列是否可编辑
+        # 权限是一个字典，key是列名（需要key_convert一下），value为是否可编辑只有'√'可以编辑
+        for i in range(1, self.tableWidget.columnCount()):
+            column_name = self.tableWidget.horizontalHeaderItem(i).text()
+            key = self.name_to_key[column_name]
+            if self.privilege[key] == '√':
+                for j in range(self.tableWidget.rowCount()):
+                    item = self.tableWidget.item(j, i)
+                    item.setFlags(QtCore.Qt.ItemIsEnabled | QtCore.Qt.ItemIsSelectable | QtCore.Qt.ItemIsEditable)
+            else:
+                for j in range(self.tableWidget.rowCount()):
+                    item = self.tableWidget.item(j, i)
+                    item.setFlags(QtCore.Qt.ItemIsEnabled | QtCore.Qt.ItemIsSelectable)
 
     def init_table_data(self, data):
         try:
@@ -630,7 +697,7 @@ class SharedTableWin(QtWidgets.QMainWindow, Ui_shared_table_widget):
             # 设置为可见
             self.tableWidget.setRowHidden(i, False)
 
-        self.disable_first_column()
+        self.disable_column()
         # 设置表格内容fit 除了上面已经设置过的
         for i in range(self.tableWidget.columnCount()):
             if i in self.check_box_index or i == self.column_name_to_index['行程']:

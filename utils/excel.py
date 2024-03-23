@@ -162,6 +162,16 @@ def export_table_widget(table_widget, filename, number_cols=None):
             ws.cell(row=row_excel_to_write + 3, column=ws.max_column).number_format = "0.00"
             ws.cell(row=row_excel_to_write + 3, column=ws.max_column).data_type = "int"
             row_excel_to_write += 1
+        # 查找是否有ws"序号"这一列如果有的话，从1开始从新编号
+        for col in range(1, ws.max_column + 1):
+            if ws.cell(row=2, column=col).value == "序号":
+                for i in range(table_widget.rowCount()):
+                    row = i + 3
+                    ws.cell(row=row, column=col).value = row - 2
+                    # 设置为数字格式
+                    ws.cell(row=row, column=col).data_type = "int"
+                break
+
         set_ws_border(ws, 1, 1, ws.max_row, ws.max_column)
         wb.save(filename)
         return True, "1"

@@ -16,6 +16,7 @@ class SocketIOClient(QObject):
     delete_rows_from_data_center_signal = pyqtSignal(dict)
     operation_desc_signal = pyqtSignal(str)
     update_data_center_signal = pyqtSignal(dict)
+    all_operation_logs_from_date_signal = pyqtSignal(list)
 
     def __init__(self, parent=None):
         super().__init__(parent)
@@ -29,6 +30,7 @@ class SocketIOClient(QObject):
         self.sio.on("s2c_operation_desc", self.s2c_operation_desc)
         self.sio.on("s2c_add_rows_to_data_center", self.add_rows_to_data_center)
         self.sio.on("s2c_update_data_center", self.update_data_center)
+        self.sio.on("s2c_all_operation_logs_from_date", self.all_operation_logs_from_date)
 
     @cached_property
     def sio(self):
@@ -75,3 +77,6 @@ class SocketIOClient(QObject):
 
     def update_data_center(self, data):
         self.update_data_center_signal.emit(data)
+
+    def all_operation_logs_from_date(self, data):
+        self.all_operation_logs_from_date_signal.emit(data)

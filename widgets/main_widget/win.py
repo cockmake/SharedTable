@@ -827,7 +827,6 @@ class MainWidget(QtWidgets.QMainWindow, Ui_MainWindow):
                         else:
                             item_content = str(cell_item.value)
                     item = QTableWidgetItem(item_content.strip())
-                    # print(background_color, foreground_color)
                     item.setBackground(QColor("#" + background_color))
                     if item_content != "":
                         item.setForeground(QColor("#" + foreground_color))

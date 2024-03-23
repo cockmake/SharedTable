@@ -12,7 +12,7 @@ from widgets.register_widget.win import RegisterWidget
 
 
 class LoginWidget(QtWidgets.QWidget, Ui_login_form):
-    login_success_signal = pyqtSignal(str, str, str, str)
+    login_success_signal = pyqtSignal(str, str, str, str, dict)
     not_login_signal = pyqtSignal()
 
     def __init__(self, parent=None):
@@ -73,11 +73,9 @@ class LoginWidget(QtWidgets.QWidget, Ui_login_form):
             QtWidgets.QMessageBox.warning(self, '提示信息', data['msg'])
         else:
             # 登录成功
-            token = data['access_token']
-            username = data['username']
-            name = data['name']
-            operation_type = data['operation_type']
-            self.login_success_signal.emit(username, name, operation_type, token)
+            self.login_success_signal.emit(data['username'], data['name'],
+                                           data['operation_type'], data['access_token'],
+                                           data['privilege'])
             self.close()
         reply.deleteLater()
 
