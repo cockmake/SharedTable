@@ -11,7 +11,6 @@ class QTableMainWindow(QtWidgets.QMainWindow, Ui_qtable_main_widget):
         self.setupUi(self)
         self.setWindowTitle(title)
         self.tableWidget.set_headers_and_data(headers, data)
-
         self.export_current_data_action.triggered.connect(self.export_current_data)
         self.number_cols = number_cols
 

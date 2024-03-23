@@ -304,38 +304,49 @@ class MainWidget(QtWidgets.QMainWindow, Ui_MainWindow):
         expense, expense_index = 0, self.col_index['应付']
         balance, balance_index = 0, self.col_index['结余']
         year_index = self.col_index['日期']
-        if months[0] == "0":
-            # 为0就是整年的统计
-            desc = ['年度总收入', '年度总支出', '年度结余']
-            self.f_s_table.setHorizontalHeaderLabels(desc)
-            for i in range(self.main_table.rowCount()):
-                year_table = self.main_table.item(i, year_index).text().split('-')[0]
-                if year_table != year:
-                    continue
-                try:
-                    income += float(self.main_table.item(i, income_idx).text())
-                    expense += float(self.main_table.item(i, expense_index).text())
-                    balance += float(self.main_table.item(i, balance_index).text())
-                except Exception as e:
-                    pass
+        months = sorted(months)
+        if len(months) == 12:
+            # 全年
+            desc = [f'{year}年度总收入', f'{year}年度总支出', f'{year}年度结余']
         else:
-            desc = ['月度总收入', '月度总支出', '月度结余']
-            self.f_s_table.setHorizontalHeaderLabels(desc)
-            for i in range(self.main_table.rowCount()):
-                year_table = self.main_table.item(i, year_index).text().split('-')[0]
-                month_table = self.main_table.item(i, year_index).text().split('-')[1]
-                if year_table != year or month_table not in months:
-                    continue
-                try:
-                    income += float(self.main_table.item(i, income_idx).text())
-                    expense += float(self.main_table.item(i, expense_index).text())
-                    balance += float(self.main_table.item(i, balance_index).text())
-                except Exception as e:
-                    pass
+            desc = [f'{months}月份总收入', f'{months}月份总支出', f'{months}月份总结余']
+        self.f_s_table.setHorizontalHeaderLabels(desc)
+        flag = False
+        rows = []
+        for i in range(self.main_table.rowCount()):
+            year_table, month_table, _ = self.main_table.item(i, year_index).text().split('-')
+            if year_table != year:
+                # 判断年
+                continue
+            if len(months) != 12 and int(month_table) not in months:
+                # 判断月
+                continue
+            income_str = self.main_table.item(i, income_idx).text().strip()
+            expense_str = self.main_table.item(i, expense_index).text().strip()
+            balance_str = self.main_table.item(i, balance_index).text().strip()
+            try:
+                income_number = float(income_str)
+                expense_number = float(expense_str)
+                balance_number = float(balance_str)
+                if income_number < 0 or expense_number < 0 or balance_number < 0:
+                    raise Exception("数值为负数")
+            except Exception as e:
+                rows.append(self.main_table.item(i, 0).text())
+                income_number = 0
+                expense_number = 0
+                balance_number = 0
+                flag = True
+            income += income_number
+            expense += expense_number
+            balance += balance_number
+        if flag:
+            rows = sorted(rows)
+            QtWidgets.QMessageBox(QtWidgets.QMessageBox.Warning, "警告", f"序号为{rows}存在数值列为空、负数、非纯数字情况！所在记录不进行计算！", parent=self).exec_()
         self.f_s_table.setRowCount(1)
         self.f_s_table.setItem(0, 0, QtWidgets.QTableWidgetItem(str(income)))
         self.f_s_table.setItem(0, 1, QtWidgets.QTableWidgetItem(str(expense)))
         self.f_s_table.setItem(0, 2, QtWidgets.QTableWidgetItem(str(balance)))
+        self.f_s_table.resizeColumnsToContents()
         self.tabWidget.setCurrentIndex(4)
 
     def f_s_action_slot(self):

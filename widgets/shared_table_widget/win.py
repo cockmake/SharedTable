@@ -11,6 +11,7 @@ from utils.qhttp import Http
 from utils.qsocketio import SocketIOClient
 from widgets.create_user_table_dialog.win import UserTableCreateDialog
 from widgets.create_wage_table_dialog.win import WageTableCreateDialog
+from widgets.f_s_dialog.win import FSDialog
 from widgets.main_table_add_dialog.win import MainTableAddDialog
 from widgets.main_table_search_widget.win import MainTableSearchWidget
 from widgets.qtable_main_widget.win import QTableMainWindow
@@ -87,6 +88,7 @@ class SharedTableWin(QtWidgets.QMainWindow, Ui_shared_table_widget):
         self.create_user_table_action.triggered.connect(self.create_user_table_slot)
         self.create_wage_table_action.triggered.connect(self.create_wage_table_slot)
         self.u_s_action.triggered.connect(self.u_s_action_slot)
+        self.f_s_action.triggered.connect(self.f_s_action_slot)
         self.user_logout.triggered.connect(self.user_logout_slot)
 
         self.export_main_table_action.triggered.connect(self.export_main_table_slot)
@@ -120,7 +122,54 @@ class SharedTableWin(QtWidgets.QMainWindow, Ui_shared_table_widget):
         self.last_click_pos = (-1, -1)
         self.http = Http()
         self.center()
-
+    def f_s_dialog_args_slot(self, year, months):
+        income, income_index = 0, self.column_name_to_index['金额']
+        expense, expense_index = 0, self.column_name_to_index['应付']
+        balance, balance_index = 0, self.column_name_to_index['结余']
+        year_index = self.column_name_to_index['日期']
+        months = sorted(months)
+        if len(months) == 12:
+            # 全年
+            headers = [f'{year}年度总收入', f'{year}年度总支出', f'{year}年度结余']
+        else:
+            headers = [f'{months}月份总收入', f'{months}月份总支出', f'{months}月份总结余']
+        flag = False
+        rows = []
+        for i in range(self.tableWidget.rowCount()):
+            year_table, month_table, _ = self.tableWidget.item(i, year_index).text().split('-')
+            if year_table != year:
+                # 判断年
+                continue
+            if len(months) != 12 and int(month_table) not in months:
+                # 判断月
+                continue
+            income_str = self.tableWidget.item(i, income_index).text().strip()
+            expense_str = self.tableWidget.item(i, expense_index).text().strip()
+            balance_str = self.tableWidget.item(i, balance_index).text().strip()
+            try:
+                income_number = float(income_str)
+                expense_number = float(expense_str)
+                balance_number = float(balance_str)
+                # 是负数也抛出异常
+                if income_number < 0 or expense_number < 0 or balance_number < 0:
+                    raise Exception("数值为负数")
+            except Exception as e:
+                rows.append(self.tableWidget.item(i, 0).text())
+                income_number = 0
+                expense_number = 0
+                balance_number = 0
+                flag = True
+            income += income_number
+            expense += expense_number
+            balance += balance_number
+        if flag:
+            rows = sorted(rows)
+            QtWidgets.QMessageBox(QtWidgets.QMessageBox.Warning, "警告", f"序号为{rows}存在数值列为空、负数、非纯数字情况！所在记录不进行计算！", parent=self).exec_()
+        self.show_table_data("收支统计表", [[income, expense, balance]], headers)
+    def f_s_action_slot(self):
+        f_s_dialog = FSDialog(parent=self)
+        f_s_dialog.search_signal.connect(self.f_s_dialog_args_slot)
+        f_s_dialog.exec_()
     def socketio_connect_error_occurred_slot(self, *args):
         self.socketio_client.connect(self.access_token, "/")
     def log_search_key_line_edit_text_changed(self, key):
@@ -161,6 +210,11 @@ class SharedTableWin(QtWidgets.QMainWindow, Ui_shared_table_widget):
         if not filename:
             return
         headers, data = get_sheet_data_and_headers(filename)
+
+        if not headers or not data:
+            QtWidgets.QMessageBox.warning(self, "警告", "导入的数据异常，请检查后重试！")
+            return
+
         if len(headers) != self.tableWidget.columnCount() - 1:
             QtWidgets.QMessageBox.warning(self, "警告", "导入的数据列数和表格列数不一致，请检查后重试！")
             return
@@ -174,7 +228,7 @@ class SharedTableWin(QtWidgets.QMainWindow, Ui_shared_table_widget):
                 return
         # 询问用户是否继续
         # 需要中文确认和取消
-        question_dialog = QtWidgets.QMessageBox(QtWidgets.QMessageBox.Question, "确认导入", "确认导入数据吗？")
+        question_dialog = QtWidgets.QMessageBox(QtWidgets.QMessageBox.Question, "确认导入", "确认导入数据吗？", parent=self)
         question_dialog.addButton("确认", QtWidgets.QMessageBox.YesRole)
         question_dialog.addButton("取消", QtWidgets.QMessageBox.NoRole)
         reply = question_dialog.exec_()
@@ -415,7 +469,7 @@ class SharedTableWin(QtWidgets.QMainWindow, Ui_shared_table_widget):
                 target_data.append([yongchedanwei, month, income, expense, balance])
         self.show_table_data("客户账单统计表", target_data, ["用车单位", "月份", "收入", "支出", "结余"], [2, 3, 4])
 
-    def show_table_data(self, title, data, headers, number_cols):
+    def show_table_data(self, title, data, headers, number_cols=None):
         qTableMainWindow = QTableMainWindow(title, headers, data, number_cols, parent=self)
         qTableMainWindow.show()
 
@@ -531,7 +585,7 @@ class SharedTableWin(QtWidgets.QMainWindow, Ui_shared_table_widget):
             return
         # 询问用户是否继续
         # 需要中文确认和取消
-        question_dialog = QtWidgets.QMessageBox(QtWidgets.QMessageBox.Question, "确认删除", "确认删除选中的行吗？")
+        question_dialog = QtWidgets.QMessageBox(QtWidgets.QMessageBox.Question, "确认删除", "确认删除选中的行吗？", parent=self)
         question_dialog.addButton("确认", QtWidgets.QMessageBox.YesRole)
         question_dialog.addButton("取消", QtWidgets.QMessageBox.NoRole)
         reply = question_dialog.exec_()
@@ -574,6 +628,7 @@ class SharedTableWin(QtWidgets.QMainWindow, Ui_shared_table_widget):
         record_id = self.tableWidget.item(row, 0).text()
         key = self.name_to_key[self.tableWidget.horizontalHeaderItem(column).text()]
         value = self.tableWidget.item(row, column).text()
+        value = value.strip()
         self.socketio_client.sio.emit("c2s_update_data_center", {
             "record_id": record_id,
             "field": key,
@@ -596,7 +651,6 @@ class SharedTableWin(QtWidgets.QMainWindow, Ui_shared_table_widget):
         for key, value in data.items():
             key = self.key_convert[key]
             self.tableWidget.setItem(row, self.column_name_to_index[key], QtWidgets.QTableWidgetItem(str(value)))
-
         self.logWidget.insertItem(0, operation_desc + '\n')
 
         self.disable_column()
@@ -604,7 +658,6 @@ class SharedTableWin(QtWidgets.QMainWindow, Ui_shared_table_widget):
         self.tableWidget.cellChanged.connect(self.cell_changed_slot)
 
     def add_one_row_to_data_center(self, add_info):
-
         convert_add_info = {}
         for key, value in add_info.items():
             convert_add_info[self.old_version_key_to_new_version_key[key]] = value
@@ -612,6 +665,7 @@ class SharedTableWin(QtWidgets.QMainWindow, Ui_shared_table_widget):
         yf = float(add_info['pay'])
         jy = je - yf
         convert_add_info['jy'] = jy
+        convert_add_info['piao'] = ''
         self.socketio_client.sio.emit("c2s_add_one_row_to_data_center", {
             "add_info": convert_add_info,
             "username": self.username
@@ -669,17 +723,20 @@ class SharedTableWin(QtWidgets.QMainWindow, Ui_shared_table_widget):
             item.setFlags(QtCore.Qt.ItemIsEnabled | QtCore.Qt.ItemIsSelectable)
         # 根据权限设置其他列是否可编辑
         # 权限是一个字典，key是列名（需要key_convert一下），value为是否可编辑只有'√'可以编辑
-        for i in range(1, self.tableWidget.columnCount()):
-            column_name = self.tableWidget.horizontalHeaderItem(i).text()
-            key = self.name_to_key[column_name]
-            if self.privilege[key] == '√':
-                for j in range(self.tableWidget.rowCount()):
-                    item = self.tableWidget.item(j, i)
-                    item.setFlags(QtCore.Qt.ItemIsEnabled | QtCore.Qt.ItemIsSelectable | QtCore.Qt.ItemIsEditable)
-            else:
-                for j in range(self.tableWidget.rowCount()):
-                    item = self.tableWidget.item(j, i)
-                    item.setFlags(QtCore.Qt.ItemIsEnabled | QtCore.Qt.ItemIsSelectable)
+        try:
+            for i in range(1, self.tableWidget.columnCount()):
+                column_name = self.tableWidget.horizontalHeaderItem(i).text()
+                key = self.name_to_key[column_name]
+                if self.privilege[key] == '√':
+                    for j in range(self.tableWidget.rowCount()):
+                        item = self.tableWidget.item(j, i)
+                        item.setFlags(QtCore.Qt.ItemIsEnabled | QtCore.Qt.ItemIsSelectable | QtCore.Qt.ItemIsEditable)
+                else:
+                    for j in range(self.tableWidget.rowCount()):
+                        item = self.tableWidget.item(j, i)
+                        item.setFlags(QtCore.Qt.ItemIsEnabled | QtCore.Qt.ItemIsSelectable)
+        except Exception as e:
+            print(e)
 
     def init_table_data(self, data):
         try:

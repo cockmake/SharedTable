@@ -50,20 +50,20 @@ class MainTableAddDialog(QtWidgets.QDialog, Ui_main_table_add_dialog):
             return
 
         target_info = {
-            "date": self.main_table_add_date.date().toString("yyyy-MM-dd"),
-            "driver": self.main_table_add_driver.text(),
-            "car_type": self.main_table_add_car_type.text(),
-            "car_number": self.main_table_add_car_number.text(),
+            "date": self.main_table_add_date.date().toString("yyyy-MM-dd").strip(),
+            "driver": self.main_table_add_driver.text().strip(),
+            "car_type": self.main_table_add_car_type.text().strip(),
+            "car_number": self.main_table_add_car_number.text().strip(),
             "qiandan": qiandan,
-            "cheshudanwei": self.main_table_add_cheshudanwei.text(),
-            "yongchedanwei": self.main_table_add_yongchedanwei.text(),
-            "time": self.main_table_add_time.text(),
-            "money": self.main_table_add_money.text(),
-            "pay": self.main_table_add_pay.text(),
+            "cheshudanwei": self.main_table_add_cheshudanwei.text().strip(),
+            "yongchedanwei": self.main_table_add_yongchedanwei.text().strip(),
+            "time": self.main_table_add_time.text().strip(),
+            "money": self.main_table_add_money.text().strip(),
+            "pay": self.main_table_add_pay.text().strip(),
             "shou": shou,
             "fu": fu,
-            "remark": self.main_table_add_remark.text(),
-            "itinerary": self.main_table_add_itinerary.text(),
+            "remark": self.main_table_add_remark.text().strip(),
+            "itinerary": self.main_table_add_itinerary.text().strip(),
         }
         self.add_confirm.emit(target_info)
 

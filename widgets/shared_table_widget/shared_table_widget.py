@@ -165,6 +165,8 @@ class Ui_shared_table_widget(object):
         self.export_main_table_action.setObjectName("export_main_table_action")
         self.add_rows = QtWidgets.QAction(shared_table_widget)
         self.add_rows.setObjectName("add_rows")
+        self.f_s_action = QtWidgets.QAction(shared_table_widget)
+        self.f_s_action.setObjectName("f_s_action")
         self.menu.addSeparator()
         self.menu.addAction(self.add_rows)
         self.menu.addAction(self.add_one_row)
@@ -176,6 +178,7 @@ class Ui_shared_table_widget(object):
         self.menu_3.addAction(self.create_user_table_action)
         self.menu_3.addAction(self.create_wage_table_action)
         self.menu_3.addAction(self.u_s_action)
+        self.menu_3.addAction(self.f_s_action)
         self.menubar.addAction(self.menu.menuAction())
         self.menubar.addAction(self.menu_3.menuAction())
         self.menubar.addAction(self.menu_2.menuAction())
@@ -237,5 +240,6 @@ class Ui_shared_table_widget(object):
         self.show_all_data_action.setText(_translate("shared_table_widget", "显示全部数据"))
         self.export_main_table_action.setText(_translate("shared_table_widget", "导出当前数据"))
         self.add_rows.setText(_translate("shared_table_widget", "批量添加"))
+        self.f_s_action.setText(_translate("shared_table_widget", "财务统计"))
 from MagicComponent import MagicTable
 import assets_rc

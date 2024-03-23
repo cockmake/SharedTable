@@ -23,6 +23,7 @@ class FSDialog(QtWidgets.QDialog, Ui_f_s_dialog):
         widget_content.setFixedHeight(35 * 13)
         widget_content.setLayout(layout_content)
         month_all = QCheckBox("全月份", parent=self.months)
+        month_all.stateChanged.connect(lambda state: [x.setChecked(state) for x in self.months_checkboxes])
         self.months_checkboxes.append(month_all)
         layout_content.addWidget(month_all)
         for i in range(1, 13):
@@ -38,11 +39,11 @@ class FSDialog(QtWidgets.QDialog, Ui_f_s_dialog):
         year = self.year.date().toString("yyyy")
         months = []
         if self.months_checkboxes[0].isChecked():
-            months.append("0")
+            months = list(range(1, 13))
         else:
             for i in range(1, len(self.months_checkboxes)):
                 if self.months_checkboxes[i].isChecked():
-                    months.append(str(i).strip('月'))
+                    months.append(int(self.months_checkboxes[i].text().strip("月")))
         if len(months) == 0:
             message_box = QtWidgets.QMessageBox(QtWidgets.QMessageBox.Warning, "警告", "请选择月份！")
             message_box.addButton(self.tr("确定"), QtWidgets.QMessageBox.YesRole)

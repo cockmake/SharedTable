@@ -44,3 +44,5 @@ class MagicTable(QtWidgets.QTableWidget):
         for i, row in enumerate(data):
             for j, cell in enumerate(row):
                 self.setItem(i, j, QtWidgets.QTableWidgetItem(str(cell)))
+
+        self.resizeColumnsToContents()

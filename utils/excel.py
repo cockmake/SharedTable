@@ -1,7 +1,8 @@
+import datetime
+
 import openpyxl
 from openpyxl.styles import (PatternFill, Border, Side, Alignment,
                              Font)
-
 
 def get_sheet_data_and_headers(filename, sheet_index=0):
     # 默认取第一个sheet
@@ -21,12 +22,25 @@ def get_sheet_data_and_headers(filename, sheet_index=0):
             cell_value = cell.value
             if cell_value is None:
                 cell_value = ""
-            if isinstance(cell_value, str):
-                cell_value = cell_value.strip()
+            if isinstance(cell_value, datetime.datetime):
+                # 日期格式就变为YYYY-MM-DD
+                cell_value = cell_value.strftime("%Y-%m-%d")
+            else:
+                cell_value = str(cell_value).strip().replace('\'', '').replace('\"', '')
             row_data.append(cell_value)
         data.append(row_data)
+    # index: 9, 12, 14
+    # 9是金额，12是应付，14是结余
+    # 开始计算
+    for i in range(len(data)):
+        try:
+            data[i][9] = float(data[i][9] if data[i][9] else 0)
+            data[i][12] = float(data[i][12] if data[i][12] else 0)
+            data[i][14] = data[i][9] - data[i][12]
+        except Exception as e:
+            print(e)
+            return [], []
     return headers, data
-
 
 def get_sheet_names(filename):
     return openpyxl.load_workbook(filename).sheetnames
@@ -162,7 +176,7 @@ def export_table_widget(table_widget, filename, number_cols=None):
             ws.cell(row=row_excel_to_write + 3, column=ws.max_column).number_format = "0.00"
             ws.cell(row=row_excel_to_write + 3, column=ws.max_column).data_type = "int"
             row_excel_to_write += 1
-        # 查找是否有ws"序号"这一列如果有的话，从1开始从新编号
+        # 查找是否有ws"序号"这一列如果有的话，从 1 开始从新编号
         for col in range(1, ws.max_column + 1):
             if ws.cell(row=2, column=col).value == "序号":
                 for i in range(table_widget.rowCount()):

@@ -330,6 +330,7 @@
     <addaction name="create_user_table_action"/>
     <addaction name="create_wage_table_action"/>
     <addaction name="u_s_action"/>
+    <addaction name="f_s_action"/>
    </widget>
    <addaction name="menu"/>
    <addaction name="menu_3"/>
@@ -384,6 +385,11 @@
   <action name="add_rows">
    <property name="text">
     <string>批量添加</string>
+   </property>
+  </action>
+  <action name="f_s_action">
+   <property name="text">
+    <string>财务统计</string>
    </property>
   </action>
  </widget>
