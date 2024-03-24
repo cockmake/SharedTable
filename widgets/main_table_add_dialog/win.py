@@ -41,13 +41,20 @@ class MainTableAddDialog(QtWidgets.QDialog, Ui_main_table_add_dialog):
         else:
             fu = ""
         if self.main_table_add_money.text() == "":
+            je = "0"
             # 不允许金额为空
-            QtWidgets.QMessageBox.warning(self, "警告", "金额不能为空")
-            return
+            # QtWidgets.QMessageBox.warning(self, "警告", "金额不能为空")
+            # return
+        else:
+            je = self.main_table_add_money.text()
+
         if self.main_table_add_pay.text() == "":
-            # 不允许金额为空
-            QtWidgets.QMessageBox.warning(self, "警告", "应付不能为空")
-            return
+            yf = "0"
+            # 不允许应付为空
+            # QtWidgets.QMessageBox.warning(self, "警告", "应付不能为空")
+            # return
+        else:
+            yf = self.main_table_add_pay.text()
 
         target_info = {
             "date": self.main_table_add_date.date().toString("yyyy-MM-dd").strip(),
@@ -58,8 +65,8 @@ class MainTableAddDialog(QtWidgets.QDialog, Ui_main_table_add_dialog):
             "cheshudanwei": self.main_table_add_cheshudanwei.text().strip(),
             "yongchedanwei": self.main_table_add_yongchedanwei.text().strip(),
             "time": self.main_table_add_time.text().strip(),
-            "money": self.main_table_add_money.text().strip(),
-            "pay": self.main_table_add_pay.text().strip(),
+            "money": je,
+            "pay": yf,
             "shou": shou,
             "fu": fu,
             "remark": self.main_table_add_remark.text().strip(),

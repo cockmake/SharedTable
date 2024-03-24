@@ -103,8 +103,8 @@ class SharedTableWin(QtWidgets.QMainWindow, Ui_shared_table_widget):
         self.log_search_key_line_edit.textChanged.connect(self.log_search_key_line_edit_text_changed)
         self.clear_log_btn.clicked.connect(lambda: self.logWidget.clear())
         self.logWidget.setWordWrap(True)
-        # 行程所在列宽度设置为380
-        self.tableWidget.setColumnWidth(self.column_name_to_index['行程'], 380)
+        # 行程所在列宽度设置为420
+        self.tableWidget.setColumnWidth(self.column_name_to_index['行程'], 420)
         qd_index = self.column_name_to_index['签单']
         piao_index = self.column_name_to_index['票']
         shou_index = self.column_name_to_index['收']
@@ -147,12 +147,10 @@ class SharedTableWin(QtWidgets.QMainWindow, Ui_shared_table_widget):
             expense_str = self.tableWidget.item(i, expense_index).text().strip()
             balance_str = self.tableWidget.item(i, balance_index).text().strip()
             try:
-                income_number = float(income_str)
-                expense_number = float(expense_str)
-                balance_number = float(balance_str)
+                income_number = float(income_str if income_str else '0')
+                expense_number = float(expense_str if expense_str else '0')
+                balance_number = float(balance_str if balance_str else '0')
                 # 是负数也抛出异常
-                if income_number < 0 or expense_number < 0 or balance_number < 0:
-                    raise Exception("数值为负数")
             except Exception as e:
                 rows.append(self.tableWidget.item(i, 0).text())
                 income_number = 0
@@ -164,7 +162,7 @@ class SharedTableWin(QtWidgets.QMainWindow, Ui_shared_table_widget):
             balance += balance_number
         if flag:
             rows = sorted(rows)
-            QtWidgets.QMessageBox(QtWidgets.QMessageBox.Warning, "警告", f"序号为{rows}存在数值列为空、负数、非纯数字情况！所在记录不进行计算！", parent=self).exec_()
+            QtWidgets.QMessageBox(QtWidgets.QMessageBox.Warning, "警告", f"序号为{rows}存在非纯数字情况！所在记录不进行计算！", parent=self).exec_()
         self.show_table_data("收支统计表", [[income, expense, balance]], headers)
     def f_s_action_slot(self):
         f_s_dialog = FSDialog(parent=self)
@@ -362,8 +360,8 @@ class SharedTableWin(QtWidgets.QMainWindow, Ui_shared_table_widget):
 
         target_data = []
         for i in range(self.tableWidget.rowCount()):
-            if self.tableWidget.isRowHidden(i):
-                continue
+            # if self.tableWidget.isRowHidden(i):
+            #     continue
             data_item = self.tableWidget.item(i, data_index)
             if data_item.text() < start_date or data_item.text() > end_date:
                 continue
@@ -402,8 +400,8 @@ class SharedTableWin(QtWidgets.QMainWindow, Ui_shared_table_widget):
 
         target_data = []
         for i in range(self.tableWidget.rowCount()):
-            if self.tableWidget.isRowHidden(i):
-                continue
+            # if self.tableWidget.isRowHidden(i):
+            #     continue
             data_item = self.tableWidget.item(i, data_index)
             if data_item.text() < start_date or data_item.text() > end_date:
                 continue
@@ -442,8 +440,8 @@ class SharedTableWin(QtWidgets.QMainWindow, Ui_shared_table_widget):
             data[yongchedanwei] = {str(i): [0, 0, 0] for i in range(1, 13)}
         # 每一个是{} key是月份，value是[income, expense, balance]
         for i in range(self.tableWidget.rowCount()):
-            if self.tableWidget.isRowHidden(i):
-                continue
+            # if self.tableWidget.isRowHidden(i):
+            #     continue
             date = self.tableWidget.item(i, data_index).text()
             year, month, day = date.split('-')
             if target_year != year:
@@ -737,6 +735,9 @@ class SharedTableWin(QtWidgets.QMainWindow, Ui_shared_table_widget):
                         item.setFlags(QtCore.Qt.ItemIsEnabled | QtCore.Qt.ItemIsSelectable)
         except Exception as e:
             print(e)
+
+        # resizeRowToContents
+        self.tableWidget.resizeRowsToContents()
 
     def init_table_data(self, data):
         try:

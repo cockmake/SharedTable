@@ -325,11 +325,9 @@ class MainWidget(QtWidgets.QMainWindow, Ui_MainWindow):
             expense_str = self.main_table.item(i, expense_index).text().strip()
             balance_str = self.main_table.item(i, balance_index).text().strip()
             try:
-                income_number = float(income_str)
-                expense_number = float(expense_str)
-                balance_number = float(balance_str)
-                if income_number < 0 or expense_number < 0 or balance_number < 0:
-                    raise Exception("数值为负数")
+                income_number = float(income_str if income_str else '0')
+                expense_number = float(expense_str if expense_str else '0')
+                balance_number = float(balance_str if balance_str else '0')
             except Exception as e:
                 rows.append(self.main_table.item(i, 0).text())
                 income_number = 0
@@ -341,7 +339,7 @@ class MainWidget(QtWidgets.QMainWindow, Ui_MainWindow):
             balance += balance_number
         if flag:
             rows = sorted(rows)
-            QtWidgets.QMessageBox(QtWidgets.QMessageBox.Warning, "警告", f"序号为{rows}存在数值列为空、负数、非纯数字情况！所在记录不进行计算！", parent=self).exec_()
+            QtWidgets.QMessageBox(QtWidgets.QMessageBox.Warning, "警告", f"序号为{rows}存在非纯数字情况！所在记录不进行计算！", parent=self).exec_()
         self.f_s_table.setRowCount(1)
         self.f_s_table.setItem(0, 0, QtWidgets.QTableWidgetItem(str(income)))
         self.f_s_table.setItem(0, 1, QtWidgets.QTableWidgetItem(str(expense)))
