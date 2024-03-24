@@ -5,12 +5,13 @@ import redis
 from flask import Flask, request, Blueprint
 from flask_cors import CORS
 from flask_socketio import SocketIO
-import asyncio
 
 from DAOOP import MYSQLOP
 from settings import REDIS_POOL_SIZE, REDIS_HOST, REDIS_PORT, REDIS_DB, REDIS_PASSWORD
-from utils import check_email_valid, generate_yzm, send_email_to_user, check_password_valid, check_username_valid, \
+from utils import check_email_valid, generate_yzm, check_password_valid, check_username_valid, \
     generate_token, get_operation_description
+
+from celery_task import celery_send_email
 
 app = Flask(__name__)
 CORS(app)
@@ -24,6 +25,7 @@ namespace = "/"
 socketio = SocketIO(app, cors_allowed_origins=cors_allowed_origins, namespace=namespace)
 
 mysql_op = MYSQLOP()
+
 redis_config = {
     "max_connections": REDIS_POOL_SIZE,  # 最大连接数比最大可工作线程数多1
     "host": REDIS_HOST,
@@ -99,10 +101,9 @@ def user_register_yzm():
         return {"msg": "邮箱已经被注册或正在审核中！", "type": "error"}
     # 生成验证码
     yzm = generate_yzm()
-    # 发送邮件
-    # ensure_future和run_coroutine_threadsafe的区别？
-    # ensure_future是异步的，run_coroutine_threadsafe是同步的
-    asyncio.ensure_future(send_email_to_user(email, '汽车租赁数据处理系统', yzm))
+    # 采用Celery异步发送
+    celery_send_email.delay(email, '汽车租聘数据处理系统', yzm)
+    # 同步发送邮件
     # send_result = send_email_to_user(email, '汽车租赁数据处理系统', yzm)
     # if not send_result:
     #     return {"msg": "邮件发送失败！", "type": "error"}
@@ -127,8 +128,9 @@ def find_password_yzm():
     username = result['username']
     # 生成验证码
     yzm = generate_yzm()
-    # 发送邮件
-    asyncio.ensure_future(send_email_to_user(email, '汽车租赁数据处理系统', yzm))
+    # 采用Celery异步发送
+    celery_send_email.delay(email, '汽车租聘数据处理系统', yzm)
+    # 同步发送邮件
     # send_result = send_email_to_user(email, '汽车租聘数据处理系统', yzm)
     # if not send_result:
     #     return {"msg": "邮件发送失败！", "type": "error"}
@@ -229,6 +231,7 @@ def admin_get_all_drop_data():
     result = mysql_op.get_all_drop_data()
     return result
 
+
 @admin.route('/restore_drop_data', methods=['POST'])
 @request_fields_require('record_id')
 def admin_restore_drop_data():
@@ -242,6 +245,7 @@ def admin_restore_drop_data():
         return {"msg": "恢复成功！", "type": "success"}
     return {"msg": "恢复失败！", "type": "error"}
 
+
 @admin.route('/delete_user', methods=['POST'])
 @request_fields_require('username', 'name')
 def admin_delete_user():
@@ -253,6 +257,7 @@ def admin_delete_user():
         return {"msg": "删除成功！", "type": "success"}
     else:
         return {"msg": "删除失败！", "type": "error"}
+
 
 @user.route('/login', methods=['POST'])
 @request_fields_require('username', 'password')
@@ -267,7 +272,7 @@ def user_login():
     if password != password_db:
         return {"msg": "密码错误！", "type": "error"}
     user_type = user_info['operation_type']
-    day_access = 21
+    day_access = 3
     cur_t = int(time.time())
     time_to_live = day_access * 24 * 60 * 60
     token = generate_token(username, cur_t, time_to_live, user_type=user_type)
@@ -330,10 +335,12 @@ def user_logout(username, name):
     print("注销成功！")
     return {"msg": "注销成功！", "type": "success"}
 
+
 @admin.route('/get_users_privilege', methods=['GET'])
 def user_get_users_privilege():
     result = mysql_op.get_users_privilege()
     return result
+
 
 @admin.route('/update_user_privilege', methods=['POST'])
 @request_fields_require('username', 'name', 'new_privilege')
@@ -346,6 +353,7 @@ def user_update_user_privilege():
     if result:
         return {"msg": "修改成功！", "type": "success"}
     return {"msg": "修改失败！", "type": "error"}
+
 
 @socketio.on('connect')
 @login_require
@@ -415,7 +423,6 @@ def handle_delete_rows_from_data_center(uname, name, data):
     record_ids = list(set(record_ids))
     operation_desc = mysql_op.delete_rows_from_data_center(record_ids, username, name)
     if not operation_desc.endswith("错误"):
-        print("删除的记录id", record_ids)
         socketio.emit('s2c_delete_rows_from_data_center', {
             "record_ids": record_ids,
             "operation_desc": operation_desc
@@ -458,7 +465,6 @@ def handle_add_rows(uname, name, data):
         return
     operation_desc = mysql_op.add_rows(fields, rows, username, name)
     if not operation_desc.endswith("错误"):
-        print("批量添加：", operation_desc)
         socketio.emit('s2c_add_rows_to_data_center', {
             "data": mysql_op.get_table_from_data_center(),
             "operation_desc": operation_desc
@@ -499,7 +505,6 @@ def handle_update_data_center(uname, name, data):
     else:
         socketio.emit('s2c_operation_desc', operation_desc)
 
-    print("更新数据：", operation_desc)
     print("*" * 20)
 
 

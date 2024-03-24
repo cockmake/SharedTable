@@ -61,7 +61,7 @@ def generate_yzm(yzm_len=6):
     return ''.join(random.choice(chars) for _ in range(yzm_len))
 
 
-async def send_email_to_user(user_email, subject, content):
+def send_email_to_user(user_email, subject, content):
     html_content = f"""
     <html>
         <body>
@@ -70,7 +70,6 @@ async def send_email_to_user(user_email, subject, content):
         </body>
     </html>
     """
-
 
 
     mail_host = "smtp.qq.com"  # 设置服务器

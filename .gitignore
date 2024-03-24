@@ -5,7 +5,10 @@ build
 dist
 
 settings.py
+*_conf.py
+*.log
 .config.json
+
 
 *.spec
 *.xlsx
