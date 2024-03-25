@@ -73,9 +73,11 @@ class MainTableAddDialog(QtWidgets.QDialog, Ui_main_table_add_dialog):
             "itinerary": self.main_table_add_itinerary.text().strip(),
         }
         self.add_confirm.emit(target_info)
+        # 添加完成后清空输入框
+        # self.add_completed_slot()
 
     def add_completed_slot(self):
-        # 日期和时间不清空
+        # 日期不清空其余清空 复选框不清空
         self.main_table_add_driver.clear()
         self.main_table_add_car_type.clear()
         self.main_table_add_car_number.clear()
@@ -84,3 +86,5 @@ class MainTableAddDialog(QtWidgets.QDialog, Ui_main_table_add_dialog):
         self.main_table_add_pay.clear()
         self.main_table_add_remark.clear()
         self.main_table_add_itinerary.clear()
+        self.main_table_add_time.clear()
+

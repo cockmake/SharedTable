@@ -20,6 +20,8 @@ from widgets.u_s_dialog.win import USDialog
 
 
 class SharedTableWin(QtWidgets.QMainWindow, Ui_shared_table_widget):
+    add_one_row_success_signal = QtCore.pyqtSignal()
+
     def __init__(self, parent=None):
         super(SharedTableWin, self).__init__(parent)
 
@@ -635,6 +637,7 @@ class SharedTableWin(QtWidgets.QMainWindow, Ui_shared_table_widget):
         })
 
     def add_one_row_to_data_center_callback(self, resp):
+        self.add_one_row_success_signal.emit()
         try:
             self.tableWidget.cellChanged.disconnect(self.cell_changed_slot)
         except Exception as e:
@@ -677,6 +680,7 @@ class SharedTableWin(QtWidgets.QMainWindow, Ui_shared_table_widget):
 
         dialog = MainTableAddDialog(self)
         dialog.add_confirm.connect(self.add_one_row_to_data_center)
+        self.add_one_row_success_signal.connect(dialog.add_completed_slot)
         dialog.exec_()
 
     def combo_box_current_text_changed(self, row, column, text):
@@ -754,8 +758,11 @@ class SharedTableWin(QtWidgets.QMainWindow, Ui_shared_table_widget):
                 self.tableWidget.setItem(i, column_index, QtWidgets.QTableWidgetItem(str(value)))
             # 设置为可见
             self.tableWidget.setRowHidden(i, False)
-
+        # 根据日期进行降序
+        self.tableWidget.sortItems(self.column_name_to_index['日期'], QtCore.Qt.DescendingOrder)
+        # 根据权限设置是否可编辑
         self.disable_column()
+
         # 设置表格内容fit 除了上面已经设置过的
         for i in range(self.tableWidget.columnCount()):
             if i in self.check_box_index or i == self.column_name_to_index['行程']:
