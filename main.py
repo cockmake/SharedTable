@@ -4,7 +4,7 @@ from functools import wraps
 import redis
 from flask import Flask, request, Blueprint
 from flask_cors import CORS
-from flask_socketio import SocketIO
+from flask_socketio import SocketIO, join_room
 
 from DAOOP import MYSQLOP
 from settings import REDIS_POOL_SIZE, REDIS_HOST, REDIS_PORT, REDIS_DB, REDIS_PASSWORD, SERVER_PORT
@@ -21,8 +21,10 @@ admin = Blueprint('admin', __name__, url_prefix='/admin')
 
 # socketio配置
 cors_allowed_origins = "*"
+# namespace的含义是把不同的事件定义在不同的命名空间下，这样可以更好的管理事件
+# client的连接可以一次性连接多个namespace
 namespace = "/"
-socketio = SocketIO(app, cors_allowed_origins=cors_allowed_origins, namespace=namespace)
+socketio = SocketIO(app, cors_allowed_origins=cors_allowed_origins)
 
 mysql_op = MYSQLOP()
 
@@ -355,14 +357,16 @@ def user_update_user_privilege():
     return {"msg": "修改失败！", "type": "error"}
 
 
-@socketio.on('connect')
+@socketio.on('connect', namespace='/')
+# @socketio.on('connect', namespace='/a')
 @login_require
 def handle_connect(uname, name):
-    # print('客户端连接成功')
-
+    print('客户端连接成功')
+    # 一般并不在这里初始化数据，而是在命名空间下的另外一个事件中初始化
+    # 因为client可以连接多个命名空间，无法确定发往哪个命名空间
     socketio.emit('s2c_init_table_data',
                   mysql_op.get_table_from_data_center(),
-                  to=request.sid)
+                  to=request.sid, namespace='/')
 
     # 将登录信息发送除了自己以外的前端（因为下面会同步所有的操作日志，只有其他客户端需要这条信息）
     login_desc = get_operation_description(name, "登录", [])
@@ -370,7 +374,7 @@ def handle_connect(uname, name):
     # 自己同步今天所有的操作日志
     today = time.strftime("%Y-%m-%d", time.localtime())
     socketio.emit('s2c_all_operation_logs_from_date', mysql_op.get_all_operation_logs_from_date(today),
-                  to=request.sid)
+                  to=request.sid, namespace='/')
     # print("*" * 20)
 
 
@@ -432,8 +436,9 @@ def handle_delete_rows_from_data_center(uname, name, data):
         socketio.emit('s2c_operation_desc', operation_desc)
     # print("*" * 20)
 
-
-@socketio.on('c2s_refresh_table_from_data_center')
+# 可以使用同一个函数处理不同的事件
+# @socketio.on('c2s_refresh_table_from_data_center', namespace='/a')
+@socketio.on('c2s_refresh_table_from_data_center', namespace='/')
 @login_require
 def handle_refresh_table_from_data_center(uname, name):
     # 同步表格
