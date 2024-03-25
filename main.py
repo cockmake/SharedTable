@@ -444,6 +444,9 @@ def handle_refresh_table_from_data_center(uname, name):
     today = time.strftime("%Y-%m-%d", time.localtime())
     socketio.emit('s2c_all_operation_logs_from_date', mysql_op.get_all_operation_logs_from_date(today),
                   to=request.sid)
+    # socketio也可以和和http一样响应式回调callback
+    # 返回数据即可
+    return {"msg": "数据同步成功！", "type": "success"}
     # print("*" * 20)
 
 
@@ -513,4 +516,4 @@ app.register_blueprint(user)
 app.register_blueprint(admin)
 
 if __name__ == '__main__':
-    socketio.run(app, host="0.0.0.0", port=SERVER_PORT)
+    socketio.run(app, host="0.0.0.0", port=SERVER_PORT, debug=True)
