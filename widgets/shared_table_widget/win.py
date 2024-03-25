@@ -116,12 +116,14 @@ class SharedTableWin(QtWidgets.QMainWindow, Ui_shared_table_widget):
         for index in self.check_box_index:
             self.tableWidget.setColumnWidth(index, 80)
 
+        self.namespace = ["/"]
 
         self.name = None
         self.username = None
         self.operation_type = None
         self.access_token = None
         self.privilege = None
+
 
         self.last_click_pos = (-1, -1)
         self.http = Http()
@@ -173,7 +175,7 @@ class SharedTableWin(QtWidgets.QMainWindow, Ui_shared_table_widget):
         f_s_dialog.search_signal.connect(self.f_s_dialog_args_slot)
         f_s_dialog.exec_()
     def socketio_connect_error_occurred_slot(self, *args):
-        self.socketio_client.connect(self.access_token, "/")
+        self.socketio_client.connect(self.access_token, self.namespace)
     def log_search_key_line_edit_text_changed(self, key):
         # 过滤logWidget中的内容
         for i in range(self.logWidget.count()):
@@ -264,13 +266,14 @@ class SharedTableWin(QtWidgets.QMainWindow, Ui_shared_table_widget):
 
     def refresh_table_btn_clicked(self):
         if not self.socketio_client.sio.connected:
-            self.socketio_client.connect(self.access_token, "/")
+            self.socketio_client.connect(self.access_token, self.namespace)
         # callback主要用来测试回调
         # 可以像http一样，发送请求，然后等待回调
         # 这里要用信号槽连接refresh_table_signal如果直接回调refresh_table_signal_slot并弹出窗口会有问题
         # 弹出窗口会阻塞，导致socketio_client的回调函数无法执行
         # 原因：callback的回调函数本质上是在socketio_client的线程中执行的，不要阻塞
         self.socketio_client.sio.emit("c2s_refresh_table_from_data_center",
+                                      namespace='/',
                                       callback=lambda x: self.refresh_table_signal.emit(x))
 
     def get_yongchedanwei_from_main_table(self):
@@ -551,7 +554,7 @@ class SharedTableWin(QtWidgets.QMainWindow, Ui_shared_table_widget):
         # 设置statusbar的提示
         self.statusbar.showMessage(f"欢迎您，{name}。")
         try:
-            self.socketio_client.connect(access_token, "/")
+            self.socketio_client.connect(access_token, self.namespace)
         except Exception as e:
             print(e)
 

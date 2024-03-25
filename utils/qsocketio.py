@@ -32,9 +32,6 @@ class SocketIOClient(QObject):
         self.sio.on("s2c_update_data_center", self.update_data_center)
         self.sio.on("s2c_all_operation_logs_from_date", self.all_operation_logs_from_date)
 
-
-
-
     @cached_property
     def sio(self):
         return socketio.Client(
