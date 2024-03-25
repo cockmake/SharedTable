@@ -7,7 +7,7 @@ SET FOREIGN_KEY_CHECKS = 0;
 DROP TABLE IF EXISTS `data_center_table`;
 CREATE TABLE `data_center_table`  (
   `record_id` bigint UNSIGNED NOT NULL AUTO_INCREMENT,
-  `rq` date NOT NULL DEFAULT 'curdate()',
+  `rq` date NOT NULL DEFAULT (curdate()),
   `sj` varchar(30) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NULL DEFAULT '',
   `ch` varchar(30) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NULL DEFAULT '',
   `cx` varchar(30) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NULL DEFAULT '',
@@ -32,7 +32,7 @@ CREATE TABLE `data_center_table`  (
 DROP TABLE IF EXISTS `data_drop_table`;
 CREATE TABLE `data_drop_table`  (
   `record_id` bigint UNSIGNED NOT NULL AUTO_INCREMENT,
-  `rq` date NOT NULL DEFAULT 'curdate()',
+  `rq` date NOT NULL DEFAULT (curdate()),
   `sj` varchar(30) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NULL DEFAULT '',
   `ch` varchar(30) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NULL DEFAULT '',
   `cx` varchar(30) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NULL DEFAULT '',
