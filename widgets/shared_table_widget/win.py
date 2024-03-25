@@ -21,7 +21,7 @@ from widgets.u_s_dialog.win import USDialog
 
 class SharedTableWin(QtWidgets.QMainWindow, Ui_shared_table_widget):
     add_one_row_success_signal = QtCore.pyqtSignal()
-
+    refresh_table_signal = QtCore.pyqtSignal(dict)
     def __init__(self, parent=None):
         super(SharedTableWin, self).__init__(parent)
 
@@ -101,6 +101,7 @@ class SharedTableWin(QtWidgets.QMainWindow, Ui_shared_table_widget):
 
         self.tableWidget.cellClicked.connect(self.table_widget_cell_clicked_slot)
 
+        self.refresh_table_signal.connect(self.refresh_table_signal_slot)
 
         self.log_search_key_line_edit.textChanged.connect(self.log_search_key_line_edit_text_changed)
         self.clear_log_btn.clicked.connect(lambda: self.logWidget.clear())
@@ -114,6 +115,7 @@ class SharedTableWin(QtWidgets.QMainWindow, Ui_shared_table_widget):
         self.check_box_index = {qd_index, piao_index, shou_index, fu_index}
         for index in self.check_box_index:
             self.tableWidget.setColumnWidth(index, 80)
+
 
         self.name = None
         self.username = None
@@ -255,10 +257,21 @@ class SharedTableWin(QtWidgets.QMainWindow, Ui_shared_table_widget):
         else:
             QtWidgets.QMessageBox.warning(self, "导出提示", "确保当前打开的文件已被关闭，然后重试！")
 
+    def refresh_table_signal_slot(self, data):
+        if data['type'] == 'success':
+            # 弹出提示框
+            QtWidgets.QMessageBox.information(self, "提示", "表格数据同步成功！")
+
     def refresh_table_btn_clicked(self):
         if not self.socketio_client.sio.connected:
             self.socketio_client.connect(self.access_token, "/")
-        self.socketio_client.sio.emit("c2s_refresh_table_from_data_center")
+        # callback主要用来测试回调
+        # 可以像http一样，发送请求，然后等待回调
+        # 这里要用信号槽连接refresh_table_signal如果直接回调refresh_table_signal_slot并弹出窗口会有问题
+        # 弹出窗口会阻塞，导致socketio_client的回调函数无法执行
+        # 原因：callback的回调函数本质上是在socketio_client的线程中执行的，不要阻塞
+        self.socketio_client.sio.emit("c2s_refresh_table_from_data_center",
+                                      callback=lambda x: self.refresh_table_signal.emit(x))
 
     def get_yongchedanwei_from_main_table(self):
         # 获取“用车单位”列表
@@ -748,6 +761,7 @@ class SharedTableWin(QtWidgets.QMainWindow, Ui_shared_table_widget):
             self.tableWidget.cellChanged.disconnect(self.cell_changed_slot)
         except Exception as e:
             pass
+
 
         self.tableWidget.setRowCount(len(data))
 
