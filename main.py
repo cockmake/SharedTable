@@ -7,7 +7,7 @@ from flask_cors import CORS
 from flask_socketio import SocketIO
 
 from DAOOP import MYSQLOP
-from settings import REDIS_POOL_SIZE, REDIS_HOST, REDIS_PORT, REDIS_DB, REDIS_PASSWORD
+from settings import REDIS_POOL_SIZE, REDIS_HOST, REDIS_PORT, REDIS_DB, REDIS_PASSWORD, SERVER_PORT
 from utils import check_email_valid, generate_yzm, check_password_valid, check_username_valid, \
     generate_token, get_operation_description
 
@@ -332,7 +332,7 @@ def user_logout(username, name):
 
     with redis.Redis(connection_pool=redis_pool) as redis_op:
         redis_op.delete(access_token)
-    print("注销成功！")
+    # print("注销成功！")
     return {"msg": "注销成功！", "type": "success"}
 
 
@@ -358,7 +358,7 @@ def user_update_user_privilege():
 @socketio.on('connect')
 @login_require
 def handle_connect(uname, name):
-    print('客户端连接成功')
+    # print('客户端连接成功')
 
     socketio.emit('s2c_init_table_data',
                   mysql_op.get_table_from_data_center(),
@@ -371,13 +371,14 @@ def handle_connect(uname, name):
     today = time.strftime("%Y-%m-%d", time.localtime())
     socketio.emit('s2c_all_operation_logs_from_date', mysql_op.get_all_operation_logs_from_date(today),
                   to=request.sid)
-    print("*" * 20)
+    # print("*" * 20)
 
 
 @socketio.on('disconnect')
 def handle_disconnect():
-    print('客户端断开连接')
-    print("*" * 20)
+    pass
+    # print('客户端断开连接')
+    # print("*" * 20)
 
 
 @socketio.on('c2s_add_one_row_to_data_center')
@@ -403,7 +404,7 @@ def handle_add_one_row_to_data_center(uname, name, data):
         })
     else:
         socketio.emit('s2c_operation_desc', operation_desc)
-    print("*" * 20)
+    # print("*" * 20)
 
 
 @socketio.on('c2s_delete_rows_from_data_center')
@@ -429,7 +430,7 @@ def handle_delete_rows_from_data_center(uname, name, data):
         })
     else:
         socketio.emit('s2c_operation_desc', operation_desc)
-    print("*" * 20)
+    # print("*" * 20)
 
 
 @socketio.on('c2s_refresh_table_from_data_center')
@@ -443,7 +444,7 @@ def handle_refresh_table_from_data_center(uname, name):
     today = time.strftime("%Y-%m-%d", time.localtime())
     socketio.emit('s2c_all_operation_logs_from_date', mysql_op.get_all_operation_logs_from_date(today),
                   to=request.sid)
-    print("*" * 20)
+    # print("*" * 20)
 
 
 @socketio.on("c2s_add_rows_to_data_center")
@@ -471,13 +472,13 @@ def handle_add_rows(uname, name, data):
         })
     else:
         socketio.emit('s2c_operation_desc', operation_desc)
-    print("*" * 20)
+    # print("*" * 20)
 
 
 @socketio.on("c2s_update_data_center")
 @login_require
 def handle_update_data_center(uname, name, data):
-    print("c2s_update_data_center")
+    # print("c2s_update_data_center")
     field = data.get('field', '')
     # 判断该token是否有权限修改该字段
     auth = request.headers.get('Authorization', '')
@@ -505,11 +506,11 @@ def handle_update_data_center(uname, name, data):
     else:
         socketio.emit('s2c_operation_desc', operation_desc)
 
-    print("*" * 20)
+    # print("*" * 20)
 
 
 app.register_blueprint(user)
 app.register_blueprint(admin)
 
 if __name__ == '__main__':
-    socketio.run(app, host="0.0.0.0", port=5001, debug=True)
+    socketio.run(app, host="0.0.0.0", port=SERVER_PORT)
