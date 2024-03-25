@@ -759,7 +759,7 @@ class SharedTableWin(QtWidgets.QMainWindow, Ui_shared_table_widget):
             # 设置为可见
             self.tableWidget.setRowHidden(i, False)
         # 根据日期进行降序
-        self.tableWidget.sortItems(self.column_name_to_index['日期'], QtCore.Qt.DescendingOrder)
+        self.tableWidget.sortItems(self.column_name_to_index['日期'], QtCore.Qt.AscendingOrder)
         # 根据权限设置是否可编辑
         self.disable_column()
 
