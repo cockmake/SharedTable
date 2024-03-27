@@ -7,6 +7,5 @@ dist
 settings.py
 .config.json
 
-*.spec
 *.xlsx
 *.exe
