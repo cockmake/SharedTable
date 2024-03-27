@@ -20,6 +20,7 @@ class SocketIOClient(QObject):
 
     def __init__(self, parent=None):
         super().__init__(parent)
+
         self.sio.on("connect", self._handle_connect)
         self.sio.on("disconnect", self._handle_disconnect)
         self.sio.on("connect_error", self._handle_connect_error)

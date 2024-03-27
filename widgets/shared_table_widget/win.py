@@ -1,5 +1,4 @@
 import time
-import traceback
 
 from PyQt5 import QtCore
 from PyQt5 import QtWidgets
@@ -22,6 +21,7 @@ from widgets.u_s_dialog.win import USDialog
 class SharedTableWin(QtWidgets.QMainWindow, Ui_shared_table_widget):
     add_one_row_success_signal = QtCore.pyqtSignal()
     refresh_table_signal = QtCore.pyqtSignal(dict)
+
     def __init__(self, parent=None):
         super(SharedTableWin, self).__init__(parent)
 
@@ -124,10 +124,10 @@ class SharedTableWin(QtWidgets.QMainWindow, Ui_shared_table_widget):
         self.access_token = None
         self.privilege = None
 
-
         self.last_click_pos = (-1, -1)
         self.http = Http()
         self.center()
+
     def f_s_dialog_args_slot(self, year, months):
         income, income_index = 0, self.column_name_to_index['金额']
         expense, expense_index = 0, self.column_name_to_index['应付']
@@ -168,14 +168,18 @@ class SharedTableWin(QtWidgets.QMainWindow, Ui_shared_table_widget):
             balance += balance_number
         if flag:
             rows = sorted(rows)
-            QtWidgets.QMessageBox(QtWidgets.QMessageBox.Warning, "警告", f"序号为{rows}存在非纯数字情况！所在记录不进行计算！", parent=self).exec_()
+            QtWidgets.QMessageBox(QtWidgets.QMessageBox.Warning, "警告",
+                                  f"序号为{rows}存在非纯数字情况！所在记录不进行计算！", parent=self).exec_()
         self.show_table_data("收支统计表", [[income, expense, balance]], headers)
+
     def f_s_action_slot(self):
         f_s_dialog = FSDialog(parent=self)
         f_s_dialog.search_signal.connect(self.f_s_dialog_args_slot)
         f_s_dialog.exec_()
+
     def socketio_connect_error_occurred_slot(self, *args):
         self.socketio_client.connect(self.access_token, self.namespace)
+
     def log_search_key_line_edit_text_changed(self, key):
         # 过滤logWidget中的内容
         for i in range(self.logWidget.count()):
@@ -184,6 +188,7 @@ class SharedTableWin(QtWidgets.QMainWindow, Ui_shared_table_widget):
                 item.setHidden(False)
             else:
                 item.setHidden(True)
+
     def all_operation_logs_from_date(self, logs: list):
         self.logWidget.clear()
         # logs逆序
@@ -191,7 +196,6 @@ class SharedTableWin(QtWidgets.QMainWindow, Ui_shared_table_widget):
         for log in logs:
             log = log[0]
             self.logWidget.addItem(log + '\n')
-
 
     def log_widget_append(self, operation_desc):
         self.logWidget.insertItem(0, operation_desc + '\n')
@@ -232,7 +236,8 @@ class SharedTableWin(QtWidgets.QMainWindow, Ui_shared_table_widget):
                 return
         # 询问用户是否继续
         # 需要中文确认和取消
-        question_dialog = QtWidgets.QMessageBox(QtWidgets.QMessageBox.Question, "确认导入", "确认导入数据吗？", parent=self)
+        question_dialog = QtWidgets.QMessageBox(QtWidgets.QMessageBox.Question, "确认导入", "确认导入数据吗？",
+                                                parent=self)
         question_dialog.addButton("确认", QtWidgets.QMessageBox.YesRole)
         question_dialog.addButton("取消", QtWidgets.QMessageBox.NoRole)
         reply = question_dialog.exec_()
@@ -274,7 +279,8 @@ class SharedTableWin(QtWidgets.QMainWindow, Ui_shared_table_widget):
         # 原因：callback的回调函数本质上是在socketio_client的线程中执行的，不要阻塞
         self.socketio_client.sio.emit("c2s_refresh_table_from_data_center",
                                       namespace='/',
-                                      callback=lambda x: self.refresh_table_signal.emit(x))
+                                      # callback=lambda resp: self.refresh_table_signal.emit(resp)
+                                      )
 
     def get_yongchedanwei_from_main_table(self):
         # 获取“用车单位”列表
@@ -601,7 +607,8 @@ class SharedTableWin(QtWidgets.QMainWindow, Ui_shared_table_widget):
             return
         # 询问用户是否继续
         # 需要中文确认和取消
-        question_dialog = QtWidgets.QMessageBox(QtWidgets.QMessageBox.Question, "确认删除", "确认删除选中的行吗？", parent=self)
+        question_dialog = QtWidgets.QMessageBox(QtWidgets.QMessageBox.Question, "确认删除", "确认删除选中的行吗？",
+                                                parent=self)
         question_dialog.addButton("确认", QtWidgets.QMessageBox.YesRole)
         question_dialog.addButton("取消", QtWidgets.QMessageBox.NoRole)
         reply = question_dialog.exec_()
@@ -765,7 +772,6 @@ class SharedTableWin(QtWidgets.QMainWindow, Ui_shared_table_widget):
         except Exception as e:
             pass
 
-
         self.tableWidget.setRowCount(len(data))
 
         for i, row in enumerate(data):
@@ -791,6 +797,6 @@ class SharedTableWin(QtWidgets.QMainWindow, Ui_shared_table_widget):
     def center(self):
         # 居中显示 且占据屏幕80%
         screen = QDesktopWidget().screenGeometry()
-        self.resize(screen.width() * 0.8, screen.height() * 0.8)
+        self.resize(int(screen.width() * 0.8), int(screen.height() * 0.8))
         size = self.geometry()
-        self.move((screen.width() - size.width()) / 2, (screen.height() - size.height()) / 2)
+        self.move((screen.width() - size.width()) // 2, (screen.height() - size.height()) // 2)

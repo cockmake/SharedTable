@@ -585,9 +585,9 @@ class MainWidget(QtWidgets.QMainWindow, Ui_MainWindow):
     def center(self):
         # 居中显示 且占据屏幕70%
         screen = QDesktopWidget().screenGeometry()
-        self.resize(screen.width() * 0.7, screen.height() * 0.7)
+        self.resize(int(screen.width() * 0.7), int(screen.height() * 0.7))
         size = self.geometry()
-        self.move((screen.width() - size.width()) / 2, (screen.height() - size.height()) / 2)
+        self.move((screen.width() - size.width()) // 2, (screen.height() - size.height()) // 2)
 
     def get_main_table_max_index(self):
         # 获取“序号”这一列的最大值

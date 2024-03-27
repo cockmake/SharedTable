@@ -31,6 +31,6 @@ class QTableMainWindow(QtWidgets.QMainWindow, Ui_qtable_main_widget):
     def center(self):
         # 居中显示 且占据屏幕65%
         screen = QDesktopWidget().screenGeometry()
-        self.resize(screen.width() * 0.65, screen.height() * 0.65)
+        self.resize(int(screen.width() * 0.65), int(screen.height() * 0.65))
         size = self.geometry()
-        self.move((screen.width() - size.width()) / 2, (screen.height() - size.height()) / 2)
+        self.move((screen.width() - size.width()) // 2, (screen.height() - size.height()) // 2)
