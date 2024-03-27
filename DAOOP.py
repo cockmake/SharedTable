@@ -33,14 +33,17 @@ class MYSQLOP:
                 cursor.execute(sql)
                 result = cursor.fetchall()
         return result
+
     def get_user_privilege(self, username, name):
         # 获取用户权限
         with self.mysql_pool.get_connection() as conn:
             with conn.cursor(dictionary=True) as cursor:
-                sql = "SELECT * FROM %s WHERE username = '%s' AND name = '%s'" % (self.user_fields_table, username, name)
+                sql = "SELECT * FROM %s WHERE username = '%s' AND name = '%s'" % (
+                    self.user_fields_table, username, name)
                 cursor.execute(sql)
                 result = cursor.fetchone()
         return result
+
     def update_user_privilege(self, username, name, new_privilege):
         # new_privilege是一个字典key是字段名，value是权限
         # 更新用户权限
@@ -58,6 +61,7 @@ class MYSQLOP:
         except Exception as e:
             print(e)
             return False
+
     def update_user_password_from_email(self, email, password):
         # 更新用户密码
         sql = "UPDATE %s SET password = '%s' WHERE email = '%s'" % (self.user_table, password, email)
@@ -70,6 +74,7 @@ class MYSQLOP:
         except Exception as e:
             print(e)
             return False
+
     def query_user_info_from_email(self, email):
         # 根据邮箱查询用户信息
         # 如果存在返回用户信息
@@ -184,7 +189,8 @@ class MYSQLOP:
                     # 删除
                     cursor.execute(sql_delete)
                     # 插入权限表
-                    sql = "INSERT INTO %s (username, name) VALUES ('%s', '%s')" % (self.user_fields_table, username, name)
+                    sql = "INSERT INTO %s (username, name) VALUES ('%s', '%s')" % (
+                        self.user_fields_table, username, name)
                     cursor.execute(sql)
                     # 提交
                     conn.commit()
@@ -286,7 +292,7 @@ class MYSQLOP:
             record_ids = [record_ids]
         try:
             sql_insert = "INSERT INTO %s SELECT * FROM %s WHERE record_id IN (" % (
-            self.data_drop_table, self.data_center_table)
+                self.data_drop_table, self.data_center_table)
             for record_id in record_ids:
                 sql_insert += "%s, " % record_id
             sql_insert = sql_insert[:-2]
@@ -351,6 +357,7 @@ class MYSQLOP:
         except Exception as e:
             print(e)
             return False
+
     def get_all_operation_logs_from_date(self, today):
         # 获取当天所有操作日志的描述即可
         sql = "SELECT operation_desc FROM %s WHERE operation_time LIKE '%s%%'" % (self.operation_log_table, today)
@@ -359,6 +366,7 @@ class MYSQLOP:
                 cursor.execute(sql)
                 result = cursor.fetchall()
         return result
+
     def get_all_drop_data(self):
         # 获取所有删除的数据
         sql = "SELECT * FROM %s" % self.data_drop_table
@@ -369,6 +377,7 @@ class MYSQLOP:
         for item in result:
             item['rq'] = item['rq'].strftime("%Y-%m-%d")
         return result
+
     def restore_drop_data(self, record_id, rq, sj, ch):
         # rq, sj, ch也需要做判断
         # 恢复删除的数据（表结构一样采用查询式插入）
@@ -406,4 +415,3 @@ class MYSQLOP:
         except Exception as e:
             print(e)
             return False
-

@@ -4,14 +4,13 @@ from functools import wraps
 import redis
 from flask import Flask, request, Blueprint
 from flask_cors import CORS
-from flask_socketio import SocketIO, join_room
+from flask_socketio import SocketIO
 
 from DAOOP import MYSQLOP
+from celery_task import celery_send_email
 from settings import REDIS_POOL_SIZE, REDIS_HOST, REDIS_PORT, REDIS_DB, REDIS_PASSWORD, SERVER_PORT
 from utils import check_email_valid, generate_yzm, check_password_valid, check_username_valid, \
     generate_token, get_operation_description
-
-from celery_task import celery_send_email
 
 app = Flask(__name__)
 CORS(app)
@@ -24,6 +23,8 @@ cors_allowed_origins = "*"
 # namespace的含义是把不同的事件定义在不同的命名空间下，这样可以更好的管理事件
 # client的连接可以一次性连接多个namespace
 namespace = "/"
+# 添加验证设置
+
 socketio = SocketIO(app, cors_allowed_origins=cors_allowed_origins)
 
 mysql_op = MYSQLOP()
@@ -98,6 +99,7 @@ def user_register_yzm():
     email = data['email']
     if not check_email_valid(email):
         return {"msg": "错误的邮箱格式！", "type": "error"}
+
     # 查询数据库是否已经存在
     if mysql_op.query_user_from_email(email):
         return {"msg": "邮箱已经被注册或正在审核中！", "type": "error"}
@@ -362,6 +364,9 @@ def user_update_user_privilege():
 @login_require
 def handle_connect(uname, name):
     print('客户端连接成功')
+    # 如何拒绝连接
+    # 直接 return False
+
     # 一般并不在这里初始化数据，而是在命名空间下的另外一个事件中初始化
     # 因为client可以连接多个命名空间，无法确定发往哪个命名空间
     socketio.emit('s2c_init_table_data',
@@ -435,6 +440,7 @@ def handle_delete_rows_from_data_center(uname, name, data):
     else:
         socketio.emit('s2c_operation_desc', operation_desc)
     # print("*" * 20)
+
 
 # 可以使用同一个函数处理不同的事件
 # @socketio.on('c2s_refresh_table_from_data_center', namespace='/a')

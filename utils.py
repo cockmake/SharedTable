@@ -71,7 +71,6 @@ def send_email_to_user(user_email, subject, content):
     </html>
     """
 
-
     mail_host = "smtp.qq.com"  # 设置服务器
     message = MIMEText(html_content, 'html', 'utf-8')
     message['From'] = sender
