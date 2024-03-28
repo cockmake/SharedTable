@@ -1,4 +1,4 @@
-import threading
+import asyncio
 import time
 
 from PyQt5 import QtCore
@@ -179,8 +179,13 @@ class SharedTableWin(QtWidgets.QMainWindow, Ui_shared_table_widget):
         f_s_dialog.exec_()
 
     def socketio_connect_error_occurred_slot(self, *args):
-        # 使用线程再次连接
-        threading.Thread(target=self.socketio_client.connect, args=(self.access_token, self.namespace)).start()
+        try:
+            # 使用线程再次连接
+            # threading.Thread(target=self.socketio_client.connect, args=(self.access_token, self.namespace)).start()
+            # 使用协程连接
+            asyncio.ensure_future(self.socketio_client.connect(self.access_token, self.namespace))
+        except Exception as e:
+            print(e)
 
     def log_search_key_line_edit_text_changed(self, key):
         # 过滤logWidget中的内容
@@ -273,7 +278,10 @@ class SharedTableWin(QtWidgets.QMainWindow, Ui_shared_table_widget):
 
     def refresh_table_btn_clicked(self):
         if not self.socketio_client.sio.connected:
-            self.socketio_client.connect(self.access_token, self.namespace)
+            # 这里需要同步连接
+            loop = asyncio.get_event_loop()
+            loop.run_until_complete(self.socketio_client.connect(self.access_token, self.namespace))
+
         # callback主要用来测试回调
         # 可以像http一样，发送请求，然后等待回调
         # 这里要用信号槽连接refresh_table_signal如果直接回调refresh_table_signal_slot并弹出窗口会有问题
@@ -553,10 +561,11 @@ class SharedTableWin(QtWidgets.QMainWindow, Ui_shared_table_widget):
 
     def after_login(self, username, name, operation_type, access_token, privilege):
         try:
-            # 协程可以用来异步执行多个任务，才会执行下一行代码，会阻塞主线程
-            # 线程可以把一个任务放到后台执行，不会阻塞主线程
-            # 这里使用线程连接
-            threading.Thread(target=self.socketio_client.connect, args=(access_token, self.namespace)).start()
+            # 使用线程连接
+            # threading.Thread(target=self.socketio_client.connect, args=(access_token, self.namespace)).start()
+            # 使用协程连接 注意asyncqt的QEventLoop
+            asyncio.ensure_future(self.socketio_client.connect(access_token, self.namespace))
+            # 多线程中使用asyncio.run_coroutine_threadsafe
         except Exception as e:
             print(e)
         self.show()

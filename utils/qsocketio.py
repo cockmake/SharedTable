@@ -44,7 +44,8 @@ class SocketIOClient(QObject):
     def stop(self):
         self.sio.disconnect()
 
-    def connect(self, access_token, namespace):
+    async def connect(self, access_token, namespace):
+        print("连接中...")
         self.sio.connect(f"{SocketIOUri}:{SocketIOPort}",
                          headers={"Authorization": access_token},
                          transports=["websocket"], namespaces=namespace)

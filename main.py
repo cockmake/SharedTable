@@ -1,4 +1,6 @@
 import sys
+import asyncio
+from asyncqt import QEventLoop
 
 from PyQt5 import QtWidgets, QtGui
 
@@ -8,6 +10,10 @@ from widgets.shared_table_widget.win import SharedTableWin
 
 if __name__ == "__main__":
     app = QtWidgets.QApplication(sys.argv)  # 初始化界面
+    # 添加事件循环
+    loop = QEventLoop(app)
+    asyncio.set_event_loop(loop)
+
     # 设置全局字体大小为11
     font = QtGui.QFont()
     font.setPointSize(11)
@@ -24,4 +30,7 @@ if __name__ == "__main__":
     LoginWindow.not_login_signal.connect(MainWindow.show)
     LoginWindow.login_success_signal.connect(MainWindow.close)
 
-    sys.exit(app.exec_())  # 显示主窗口
+    # with loop:
+    #     loop.run_forever()
+
+    sys.exit(app.exec_())
