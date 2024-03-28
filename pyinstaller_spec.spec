@@ -1,5 +1,4 @@
 # -*- mode: python ; coding: utf-8 -*-
-# excludes=["PIL", "scipy", "qfluentwidgets", "numpy"]
 
 a = Analysis(
     ['main.py'],
@@ -10,7 +9,7 @@ a = Analysis(
     hookspath=[],
     hooksconfig={},
     runtime_hooks=[],
-    excludes=[],
+    excludes=["PIL", "scipy", "numpy", "redis", "setuptools"],
     noarchive=False,
 )
 pyz = PYZ(a.pure)

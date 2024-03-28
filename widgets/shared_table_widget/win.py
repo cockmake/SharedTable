@@ -1,3 +1,4 @@
+import threading
 import time
 
 from PyQt5 import QtCore
@@ -178,7 +179,8 @@ class SharedTableWin(QtWidgets.QMainWindow, Ui_shared_table_widget):
         f_s_dialog.exec_()
 
     def socketio_connect_error_occurred_slot(self, *args):
-        self.socketio_client.connect(self.access_token, self.namespace)
+        # 使用线程再次连接
+        threading.Thread(target=self.socketio_client.connect, args=(self.access_token, self.namespace)).start()
 
     def log_search_key_line_edit_text_changed(self, key):
         # 过滤logWidget中的内容
@@ -279,7 +281,7 @@ class SharedTableWin(QtWidgets.QMainWindow, Ui_shared_table_widget):
         # 原因：callback的回调函数本质上是在socketio_client的线程中执行的，不要阻塞
         self.socketio_client.sio.emit("c2s_refresh_table_from_data_center",
                                       namespace='/',
-                                      # callback=lambda resp: self.refresh_table_signal.emit(resp)
+                                      callback=lambda resp: self.refresh_table_signal.emit(resp)
                                       )
 
     def get_yongchedanwei_from_main_table(self):
@@ -550,19 +552,21 @@ class SharedTableWin(QtWidgets.QMainWindow, Ui_shared_table_widget):
         self.close()
 
     def after_login(self, username, name, operation_type, access_token, privilege):
+        try:
+            # 协程可以用来异步执行多个任务，才会执行下一行代码，会阻塞主线程
+            # 线程可以把一个任务放到后台执行，不会阻塞主线程
+            # 这里使用线程连接
+            threading.Thread(target=self.socketio_client.connect, args=(access_token, self.namespace)).start()
+        except Exception as e:
+            print(e)
         self.show()
         self.username = username
         self.name = name
         self.operation_type = operation_type
         self.access_token = access_token
         self.privilege = privilege
-
         # 设置statusbar的提示
         self.statusbar.showMessage(f"欢迎您，{name}。")
-        try:
-            self.socketio_client.connect(access_token, self.namespace)
-        except Exception as e:
-            print(e)
 
     def delete_rows_from_data_center_callback(self, resp):
         try:
