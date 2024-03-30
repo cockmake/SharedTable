@@ -415,3 +415,6 @@ class MYSQLOP:
         except Exception as e:
             print(e)
             return False
+
+
+mysql_op = MYSQLOP()
