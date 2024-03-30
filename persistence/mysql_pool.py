@@ -1,4 +1,6 @@
-from mysql.connector.pooling import MySQLConnectionPool
+import pymysql
+from dbutils.pooled_db import PooledDB
+from pymysql.cursors import DictCursor
 
 from settings import MYSQL_USER, MYSQL_PASSWORD, MYSQL_HOST, MYSQL_PORT, MYSQL_DATABASE, MYSQL_POOL_SIZE
 from utils.common import get_operation_description, get_update_operation_description
@@ -6,17 +8,18 @@ from utils.common import get_operation_description, get_update_operation_descrip
 
 class MYSQLOP:
     def __init__(self):
-        dbconfig = {
-            "pool_name": f"{MYSQL_DATABASE}_pool",
-            "pool_reset_session": True,
-            "pool_size": MYSQL_POOL_SIZE,  # 最大连接数比最大可工作线程数多1
-            "host": MYSQL_HOST,
-            "user": MYSQL_USER,
-            "password": MYSQL_PASSWORD,
-            "port": MYSQL_PORT,
-            "database": MYSQL_DATABASE
-        }
-        self.mysql_pool = MySQLConnectionPool(**dbconfig)
+        self.mysql_pool = PooledDB(
+            creator=pymysql,  # 使用链接数据库的模块
+            ping=0,
+            mincached=MYSQL_POOL_SIZE,  # 初始化时，链接池中至少创建的链接，0表示不创建
+            maxconnections=MYSQL_POOL_SIZE * 2,  # 连接池允许的最大连接数，0和None表示不限制连接数
+            blocking=True,  # 连接池中如果没有可用连接后，是否阻塞等待。True，等待；False，不等待然后报错
+            host=MYSQL_HOST,
+            port=MYSQL_PORT,
+            user=MYSQL_USER,
+            password=MYSQL_PASSWORD,
+            database=MYSQL_DATABASE
+        )
         self.user_table = "user_table"  # 已经注册的用户表
         self.user_to_register_table = "user_to_register_table"  # 待审核的用户表
         self.data_center_table = "data_center_table"  # 数据中心表
@@ -27,8 +30,8 @@ class MYSQLOP:
 
     def get_users_privilege(self):
         # 获取用户可以修改的字段
-        with self.mysql_pool.get_connection() as conn:
-            with conn.cursor(dictionary=True) as cursor:
+        with self.mysql_pool.connection() as conn:
+            with conn.cursor(cursor=DictCursor) as cursor:
                 sql = "SELECT * FROM %s" % self.user_fields_table
                 cursor.execute(sql)
                 result = cursor.fetchall()
@@ -36,8 +39,8 @@ class MYSQLOP:
 
     def get_user_privilege(self, username, name):
         # 获取用户权限
-        with self.mysql_pool.get_connection() as conn:
-            with conn.cursor(dictionary=True) as cursor:
+        with self.mysql_pool.connection() as conn:
+            with conn.cursor(cursor=DictCursor) as cursor:
                 sql = "SELECT * FROM %s WHERE username = '%s' AND name = '%s'" % (
                     self.user_fields_table, username, name)
                 cursor.execute(sql)
@@ -53,7 +56,7 @@ class MYSQLOP:
         sql = sql[:-2]
         sql += f" WHERE username = '{username}' AND name = '{name}'"
         try:
-            with self.mysql_pool.get_connection() as conn:
+            with self.mysql_pool.connection() as conn:
                 with conn.cursor() as cursor:
                     cursor.execute(sql)
                     conn.commit()
@@ -66,7 +69,7 @@ class MYSQLOP:
         # 更新用户密码
         sql = "UPDATE %s SET password = '%s' WHERE email = '%s'" % (self.user_table, password, email)
         try:
-            with self.mysql_pool.get_connection() as conn:
+            with self.mysql_pool.connection() as conn:
                 with conn.cursor() as cursor:
                     cursor.execute(sql)
                     conn.commit()
@@ -79,8 +82,8 @@ class MYSQLOP:
         # 根据邮箱查询用户信息
         # 如果存在返回用户信息
         # 如果不存在返回None
-        with self.mysql_pool.get_connection() as conn:
-            with conn.cursor(dictionary=True) as cursor:
+        with self.mysql_pool.connection() as conn:
+            with conn.cursor(cursor=DictCursor) as cursor:
                 sql = "SELECT * FROM %s WHERE email = '%s'" % (self.user_table, email)
                 cursor.execute(sql)
                 result = cursor.fetchone()
@@ -90,8 +93,8 @@ class MYSQLOP:
         # 根据用户名查询用户信息
         # 如果存在返回用户信息
         # 如果不存在返回None
-        with self.mysql_pool.get_connection() as conn:
-            with conn.cursor(dictionary=True) as cursor:
+        with self.mysql_pool.connection() as conn:
+            with conn.cursor(cursor=DictCursor) as cursor:
                 sql = "SELECT * FROM %s WHERE username = '%s'" % (self.user_table, username)
                 cursor.execute(sql)
                 result = cursor.fetchone()
@@ -101,7 +104,7 @@ class MYSQLOP:
         # 在两个表中查询是否存在该用户名
         # 如果存在返回True
         # 如果不存在返回False
-        with self.mysql_pool.get_connection() as conn:
+        with self.mysql_pool.connection() as conn:
             with conn.cursor() as cursor:
                 sql = "SELECT * FROM %s WHERE username = '%s'" % (self.user_table, username)
                 cursor.execute(sql)
@@ -121,7 +124,7 @@ class MYSQLOP:
         # 在两个表中查询是否存在该邮箱
         # 如果存在返回True
         # 如果不存在返回False
-        with self.mysql_pool.get_connection() as conn:
+        with self.mysql_pool.connection() as conn:
             with conn.cursor() as cursor:
                 sql = "SELECT * FROM %s WHERE email = '%s'" % (self.user_table, email)
                 cursor.execute(sql)
@@ -142,7 +145,7 @@ class MYSQLOP:
         sql = "INSERT INTO %s (username, password, email, name, phone, operation_type) VALUES ('%s', '%s', '%s', '%s', '%s', '%s')" % (
             self.user_to_register_table, username, password, email, name, phone, operation_type)
         try:
-            with self.mysql_pool.get_connection() as conn:
+            with self.mysql_pool.connection() as conn:
                 with conn.cursor() as cursor:
                     cursor.execute(sql)
                     conn.commit()
@@ -154,8 +157,8 @@ class MYSQLOP:
     def get_users_to_register(self):
         # 获取所有待审核用户
         sql = "SELECT username, email, name, operation_type, phone, request_time FROM %s" % self.user_to_register_table
-        with self.mysql_pool.get_connection() as conn:
-            with conn.cursor(dictionary=True) as cursor:
+        with self.mysql_pool.connection() as conn:
+            with conn.cursor(cursor=DictCursor) as cursor:
                 cursor.execute(sql)
                 result = cursor.fetchall()
         for item in result:
@@ -170,8 +173,8 @@ class MYSQLOP:
         # 插入权限表
         sql_query = "SELECT * FROM %s WHERE username = '%s' AND email = '%s' AND name = '%s' AND phone = '%s'" % (
             self.user_to_register_table, username, email, name, phone)
-        with self.mysql_pool.get_connection() as conn:
-            with conn.cursor(dictionary=True) as cursor:
+        with self.mysql_pool.connection() as conn:
+            with conn.cursor(cursor=DictCursor) as cursor:
                 cursor.execute(sql_query)
                 result = cursor.fetchone()
         if not result:
@@ -182,7 +185,7 @@ class MYSQLOP:
             self.user_table, username, password, email, name, phone, operation_type)
         sql_delete = "DELETE FROM %s WHERE username = '%s'" % (self.user_to_register_table, username)
         try:
-            with self.mysql_pool.get_connection() as conn:
+            with self.mysql_pool.connection() as conn:
                 with conn.cursor() as cursor:
                     # 插入
                     cursor.execute(sql_insert)
@@ -205,7 +208,7 @@ class MYSQLOP:
         sql_delete = "DELETE FROM %s WHERE username = '%s' AND email = '%s' AND name = '%s' AND phone = '%s'" % (
             self.user_to_register_table, username, email, name, phone)
         try:
-            with self.mysql_pool.get_connection() as conn:
+            with self.mysql_pool.connection() as conn:
                 with conn.cursor() as cursor:
                     cursor.execute(sql_delete)
                     conn.commit()
@@ -218,8 +221,8 @@ class MYSQLOP:
         # 获取数据中心表
         # 其中的日期格式化为%Y-%m-%d
         sql = "SELECT * FROM %s" % self.data_center_table
-        with self.mysql_pool.get_connection() as conn:
-            with conn.cursor(dictionary=True) as cursor:
+        with self.mysql_pool.connection() as conn:
+            with conn.cursor(cursor=DictCursor) as cursor:
                 cursor.execute(sql)
                 result = cursor.fetchall()
         for item in result:
@@ -238,7 +241,7 @@ class MYSQLOP:
                 sql += "'%s', " % add_info[key]
             sql = sql[:-2]
             sql += ")"
-            with self.mysql_pool.get_connection() as conn:
+            with self.mysql_pool.connection() as conn:
                 with conn.cursor() as cursor:
                     cursor.execute(sql)
                     last_id = cursor.lastrowid
@@ -268,7 +271,7 @@ class MYSQLOP:
                 sql = sql[:-2]
                 sql += "), "
             sql = sql[:-2]
-            with self.mysql_pool.get_connection() as conn:
+            with self.mysql_pool.connection() as conn:
                 with conn.cursor() as cursor:
                     cursor.execute(sql)
                     last_id = cursor.lastrowid
@@ -297,7 +300,7 @@ class MYSQLOP:
                 sql_insert += "%s, " % record_id
             sql_insert = sql_insert[:-2]
             sql_insert += ")"
-            with self.mysql_pool.get_connection() as conn:
+            with self.mysql_pool.connection() as conn:
                 with conn.cursor() as cursor:
                     # 插入数据删除表
                     cursor.execute(sql_insert)
@@ -326,7 +329,7 @@ class MYSQLOP:
         try:
             sql_query = "SELECT %s FROM %s WHERE record_id = %s" % (field, self.data_center_table, record_id)
             print(sql_query)
-            with self.mysql_pool.get_connection() as conn:
+            with self.mysql_pool.connection() as conn:
                 with conn.cursor() as cursor:
                     cursor.execute(sql_query)
                     src_data = cursor.fetchone()[0]
@@ -349,7 +352,7 @@ class MYSQLOP:
         sql = "INSERT INTO %s (username, operation_type, operation_desc) VALUES ('%s', '%s', '%s')" % (
             self.operation_log_table, username, operation_type, operation_desc)
         try:
-            with self.mysql_pool.get_connection() as conn:
+            with self.mysql_pool.connection() as conn:
                 with conn.cursor() as cursor:
                     cursor.execute(sql)
                     conn.commit()
@@ -361,17 +364,18 @@ class MYSQLOP:
     def get_all_operation_logs_from_date(self, today):
         # 获取当天所有操作日志的描述即可
         sql = "SELECT operation_desc FROM %s WHERE operation_time LIKE '%s%%'" % (self.operation_log_table, today)
-        with self.mysql_pool.get_connection() as conn:
+        with self.mysql_pool.connection() as conn:
             with conn.cursor() as cursor:
                 cursor.execute(sql)
                 result = cursor.fetchall()
-        return result
+        a = [list(item) for item in result]
+        return a
 
     def get_all_drop_data(self):
         # 获取所有删除的数据
         sql = "SELECT * FROM %s" % self.data_drop_table
-        with self.mysql_pool.get_connection() as conn:
-            with conn.cursor(dictionary=True) as cursor:
+        with self.mysql_pool.connection() as conn:
+            with conn.cursor(cursor=DictCursor) as cursor:
                 cursor.execute(sql)
                 result = cursor.fetchall()
         for item in result:
@@ -388,7 +392,7 @@ class MYSQLOP:
         sql_delete = "DELETE FROM %s WHERE record_id = %s AND rq = '%s' AND sj = '%s' AND ch = '%s'" % (
             self.data_drop_table, record_id, rq, sj, ch)
         try:
-            with self.mysql_pool.get_connection() as conn:
+            with self.mysql_pool.connection() as conn:
                 with conn.cursor() as cursor:
                     # 插入数据中心表
                     cursor.execute(sql_insert)
@@ -406,7 +410,7 @@ class MYSQLOP:
         sql_delete_user = "DELETE FROM %s WHERE username = '%s' AND name = '%s'" % (self.user_table, username, name)
         sql_delete_privilege = "DELETE FROM %s WHERE username = '%s'" % (self.user_fields_table, username)
         try:
-            with self.mysql_pool.get_connection() as conn:
+            with self.mysql_pool.connection() as conn:
                 with conn.cursor() as cursor:
                     cursor.execute(sql_delete_user)
                     cursor.execute(sql_delete_privilege)
