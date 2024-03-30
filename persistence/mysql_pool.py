@@ -35,6 +35,8 @@ class MYSQLOP:
                 sql = "SELECT * FROM %s" % self.user_fields_table
                 cursor.execute(sql)
                 result = cursor.fetchall()
+        if len(result) == 0:
+            return []
         return result
 
     def get_user_privilege(self, username, name):
@@ -161,6 +163,8 @@ class MYSQLOP:
             with conn.cursor(cursor=DictCursor) as cursor:
                 cursor.execute(sql)
                 result = cursor.fetchall()
+        if len(result) == 0:
+            return []
         for item in result:
             item['request_time'] = item['request_time'].strftime("%Y-%m-%d %H:%M:%S")
         return result
@@ -225,6 +229,8 @@ class MYSQLOP:
             with conn.cursor(cursor=DictCursor) as cursor:
                 cursor.execute(sql)
                 result = cursor.fetchall()
+        if len(result) == 0:
+            return []
         for item in result:
             item['rq'] = item['rq'].strftime("%Y-%m-%d")
         return result
@@ -378,6 +384,8 @@ class MYSQLOP:
             with conn.cursor(cursor=DictCursor) as cursor:
                 cursor.execute(sql)
                 result = cursor.fetchall()
+        if len(result) == 0:
+            return []
         for item in result:
             item['rq'] = item['rq'].strftime("%Y-%m-%d")
         return result
