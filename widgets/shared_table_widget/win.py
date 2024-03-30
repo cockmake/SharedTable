@@ -183,7 +183,7 @@ class SharedTableWin(QtWidgets.QMainWindow, Ui_shared_table_widget):
             # 使用线程再次连接
             # threading.Thread(target=self.socketio_client.connect, args=(self.access_token, self.namespace)).start()
             # 使用协程连接
-            asyncio.ensure_future(self.socketio_client.connect(self.access_token, self.namespace))
+            asyncio.create_task(self.socketio_client.connect(self.access_token, self.namespace))
         except Exception as e:
             print(e)
 
@@ -564,7 +564,7 @@ class SharedTableWin(QtWidgets.QMainWindow, Ui_shared_table_widget):
             # 使用线程连接
             # threading.Thread(target=self.socketio_client.connect, args=(access_token, self.namespace)).start()
             # 使用协程连接 注意asyncqt的QEventLoop
-            asyncio.ensure_future(self.socketio_client.connect(access_token, self.namespace))
+            asyncio.create_task(self.socketio_client.connect(access_token, self.namespace))
             # 多线程中使用asyncio.run_coroutine_threadsafe
         except Exception as e:
             print(e)

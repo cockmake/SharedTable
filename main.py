@@ -1,8 +1,8 @@
-import sys
 import asyncio
-from asyncqt import QEventLoop
+import sys
 
 from PyQt5 import QtWidgets, QtGui
+from asyncqt import QEventLoop
 
 from widgets.login_widget.win import LoginWidget
 from widgets.main_widget.win import MainWidget
@@ -30,7 +30,7 @@ if __name__ == "__main__":
     LoginWindow.not_login_signal.connect(MainWindow.show)
     LoginWindow.login_success_signal.connect(MainWindow.close)
 
-    # with loop:
-    #     loop.run_forever()
+    with loop:
+        loop.run_forever()
 
-    sys.exit(app.exec_())
+    # sys.exit(app.exec_())
