@@ -10,9 +10,11 @@ class MYSQLOP:
     def __init__(self):
         self.mysql_pool = PooledDB(
             creator=pymysql,  # 使用链接数据库的模块
+            mincached=MYSQL_POOL_SIZE // 2,  # 初始化时，链接池中至少创建的链接，0表示不创建
+            maxcached=MYSQL_POOL_SIZE,
+            maxusage=50,  # 一个连接可以复用的次数
             ping=0,
-            mincached=MYSQL_POOL_SIZE,  # 初始化时，链接池中至少创建的链接，0表示不创建
-            maxconnections=MYSQL_POOL_SIZE * 2,  # 连接池允许的最大连接数，0和None表示不限制连接数
+            maxconnections=1000,  # 连接池允许的最大连接数 不要超过数据库的限制
             blocking=True,  # 连接池中如果没有可用连接后，是否阻塞等待。True，等待；False，不等待然后报错
             host=MYSQL_HOST,
             port=MYSQL_PORT,
