@@ -5,7 +5,7 @@ from flask import Blueprint, request
 
 from celery_task import celery_send_email
 from persistence import mysql_op, redis_pool
-from request_wrap import request_fields_require, login_require
+from request_wrap import request_fields_require, login_require, access_limit
 from utils.common import check_email_valid, generate_yzm, check_username_valid, check_password_valid, \
     generate_token, get_operation_description
 
@@ -13,6 +13,7 @@ user = Blueprint('user', __name__, url_prefix='/user')
 
 
 @user.route('/register_yzm', methods=['POST'])
+@access_limit(count_limit=3, time_limit_sec=60)
 @request_fields_require('email')
 def user_register_yzm():
     data = request.json

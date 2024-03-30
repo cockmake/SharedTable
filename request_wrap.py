@@ -5,6 +5,29 @@ from flask import request
 
 from persistence import redis_pool
 
+def access_limit(count_limit=3, time_limit_sec=60):
+    def decorator(f):
+        @wraps(f)
+        def inline_function(*args, **kwargs):
+            # 原来f的里面的参数会传递到这里来
+            # x_ip = request.headers.get('X-Real-IP', request.remote_addr)
+            agent = request.headers.get('User-Agent', '')
+            origin = request.headers.get('Origin', '')
+            route_path = request.path
+            key = f'{route_path}:{agent + origin}'
+            with redis.Redis(connection_pool=redis_pool) as redis_op:
+                count = redis_op.get(key)
+                if count is None:
+                    redis_op.setex(key, time_limit_sec, 1)
+                else:
+                    count = int(count)
+                    if count >= count_limit:
+                        return {'msg': f'access limit in {time_limit_sec} seconds', 'type': 'error'}, 429
+                    redis_op.incr(key)
+            # 回去继续执行f这里，传入username
+            return f(*args, **kwargs)  # 这里可以重新设置参数
+        return inline_function
+    return decorator
 
 def login_require(f):
     # 在这里检查headers中的Authorization | access_token
