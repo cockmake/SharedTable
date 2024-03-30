@@ -1,7 +1,7 @@
 from mysql.connector.pooling import MySQLConnectionPool
 
 from settings import MYSQL_USER, MYSQL_PASSWORD, MYSQL_HOST, MYSQL_PORT, MYSQL_DATABASE, MYSQL_POOL_SIZE
-from utils import get_operation_description, get_update_operation_description
+from utils.common import get_operation_description, get_update_operation_description
 
 
 class MYSQLOP:

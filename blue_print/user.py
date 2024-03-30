@@ -5,8 +5,8 @@ from flask import Blueprint, request
 
 from celery_task import celery_send_email
 from persistence import mysql_op, redis_pool
-from request_wraps import request_fields_require, login_require
-from utils import check_email_valid, generate_yzm, check_username_valid, check_password_valid, \
+from request_wrap import request_fields_require, login_require
+from utils.common import check_email_valid, generate_yzm, check_username_valid, check_password_valid, \
     generate_token, get_operation_description
 
 user = Blueprint('user', __name__, url_prefix='/user')

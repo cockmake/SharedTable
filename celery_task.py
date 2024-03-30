@@ -7,7 +7,8 @@ from celery.app.control import Control
 from settings import BROKER, RESULT_BACKEND, CPU_CORES, RESULT_EXPIRES, TASK_SOFT_TIME_LIMIT, TASK_TIME_LIMIT, \
     WORKER_MAX_TASKS_PER_CHILD, LOGLEVEL, WORKER_REDIRECT_STDOUTS_LEVEL, WORKER_REDIRECT_STDOUTS, \
     WORKER_PREFETCH_MULTIPLIER
-from utils import send_email_to_user
+
+from utils.common import send_email_to_user
 
 celery_app = Celery('celery_app', broker=BROKER, backend=RESULT_BACKEND)
 celery_app.conf.update(

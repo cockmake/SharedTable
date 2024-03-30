@@ -1,7 +1,7 @@
 from flask import Blueprint, request
 
 from persistence.mysql_pool import mysql_op
-from request_wraps import request_fields_require
+from request_wrap import request_fields_require
 
 admin = Blueprint('admin', __name__, url_prefix='/admin')
 

@@ -4,10 +4,11 @@ import time
 import redis
 from flask import request
 from flask_socketio import SocketIO
+
 from flask_app import app
 from persistence import mysql_op, redis_pool
-from request_wraps import login_require
-from utils import get_operation_description
+from request_wrap import login_require
+from utils.common import get_operation_description
 
 # namespace的含义是把不同的事件定义在不同的命名空间下，这样可以更好的管理事件
 # client的连接可以一次性连接多个namespace
@@ -16,8 +17,8 @@ from utils import get_operation_description
 socketio = SocketIO(app, cors_allowed_origins="*")
 
 
-@socketio.on('connect', namespace='/')
 # @socketio.on('connect', namespace='/a')
+@socketio.on('connect', namespace='/')
 @login_require
 def handle_connect(uname, name):
     print('客户端连接成功')
