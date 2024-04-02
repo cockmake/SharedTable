@@ -810,7 +810,7 @@ class SharedTableWin(QtWidgets.QMainWindow, Ui_shared_table_widget):
             self.tableWidget.resizeColumnToContents(i)
 
         # resizeRowToContents
-        # self.tableWidget.resizeRowsToContents()
+        self.tableWidget.resizeRowsToContents()
 
         self.tableWidget.cellChanged.connect(self.cell_changed_slot)
 
