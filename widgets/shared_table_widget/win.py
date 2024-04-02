@@ -107,15 +107,17 @@ class SharedTableWin(QtWidgets.QMainWindow, Ui_shared_table_widget):
         self.log_search_key_line_edit.textChanged.connect(self.log_search_key_line_edit_text_changed)
         self.clear_log_btn.clicked.connect(lambda: self.logWidget.clear())
         self.logWidget.setWordWrap(True)
-        # 行程所在列宽度设置为420
-        self.tableWidget.setColumnWidth(self.column_name_to_index['行程'], 420)
+        # 行程所在列宽度设置为360
+        self.tableWidget.setColumnWidth(self.column_name_to_index['行程'], 320)
+        self.tableWidget.setColumnWidth(self.column_name_to_index['用车时间'], 160)
+
         qd_index = self.column_name_to_index['签单']
         piao_index = self.column_name_to_index['票']
         shou_index = self.column_name_to_index['收']
         fu_index = self.column_name_to_index['付']
         self.check_box_index = {qd_index, piao_index, shou_index, fu_index}
         for index in self.check_box_index:
-            self.tableWidget.setColumnWidth(index, 80)
+            self.tableWidget.setColumnWidth(index, 55)
 
         self.namespace = ["/"]
 
@@ -554,7 +556,9 @@ class SharedTableWin(QtWidgets.QMainWindow, Ui_shared_table_widget):
             params = {}
             self.http.get(url, params, headers)
 
-        time.sleep(0.2)
+        time.sleep(0.3)
+
+
 
     def user_logout_slot(self):
         self.close()
@@ -776,8 +780,7 @@ class SharedTableWin(QtWidgets.QMainWindow, Ui_shared_table_widget):
         except Exception as e:
             print(e)
 
-        # resizeRowToContents
-        self.tableWidget.resizeRowsToContents()
+
 
     def init_table_data(self, data):
         try:
@@ -801,9 +804,13 @@ class SharedTableWin(QtWidgets.QMainWindow, Ui_shared_table_widget):
 
         # 设置表格内容fit 除了上面已经设置过的
         for i in range(self.tableWidget.columnCount()):
-            if i in self.check_box_index or i == self.column_name_to_index['行程']:
+            if (i in self.check_box_index or i == self.column_name_to_index['行程']
+                    or i == self.column_name_to_index['用车时间']):
                 continue
             self.tableWidget.resizeColumnToContents(i)
+
+        # resizeRowToContents
+        # self.tableWidget.resizeRowsToContents()
 
         self.tableWidget.cellChanged.connect(self.cell_changed_slot)
 

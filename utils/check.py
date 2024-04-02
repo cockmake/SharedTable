@@ -1,4 +1,12 @@
+import inspect
 import re
+
+
+def get_func_param_number(func):
+    signature = inspect.signature(func)
+    params = signature.parameters
+    keys = set(params.keys()) - {'args', 'kwargs'}
+    return len(keys)
 
 
 def check_username_valid(username):
@@ -27,7 +35,7 @@ def check_email_valid(email):
         return False
 
 
-def check_phone_valid(phone):
+def check_phone_valid(phone, *args, **kwargs):
     # 手机号只允许输入数字且长度为11位
     if len(phone) != 11:
         return False

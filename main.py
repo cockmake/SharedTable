@@ -30,7 +30,7 @@ if __name__ == "__main__":
     LoginWindow.not_login_signal.connect(MainWindow.show)
     LoginWindow.login_success_signal.connect(MainWindow.close)
 
-    with loop:
-        loop.run_forever()
+    # with loop:
+    #     loop.run_forever()
 
-    # sys.exit(app.exec_())
+    sys.exit(app.exec_())
